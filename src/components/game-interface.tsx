@@ -4,7 +4,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { HandMetal, Hand, Scissors, Wallet, Users, UserPlus, DoorOpen, XCircle, Hourglass, Repeat } from 'lucide-react';
+import { HandMetal, Hand, Scissors, Wallet, Users, UserPlus, DoorOpen, XCircle, Hourglass, Repeat, Send } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import type { Move, Outcome } from '@/lib/game';
 import { MOVES, determineWinner, MOVE_EMOJIS } from '@/lib/game';
@@ -15,7 +15,7 @@ import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/comp
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
-
+import type { LobbyConfig } from '@/app/page'; // Import LobbyConfig
 
 type GameState =
   | 'initial'
@@ -35,7 +35,13 @@ const MOVE_ICONS: Record<Move, React.ElementType> = {
 const BET_AMOUNTS = [10, 100, 1000];
 const SIMULATED_FRIENDS_LIST = ['Alice (Simulated)', 'Bob (Simulated)', 'Charlie (Simulated)', 'Dave (Simulated)', 'Eve (Simulated)', 'Mallory (Simulated)'];
 
-export default function GameInterface() {
+interface GameInterfaceProps {
+  initialLobbyConfig?: LobbyConfig | null;
+  onLobbyInitialized?: () => void;
+  onCoinsChange?: (newCoinAmount: number) => void; // Callback to notify HomePage of coin changes
+}
+
+export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, onCoinsChange }: GameInterfaceProps) {
   const [coins, setCoins] = useState(1000);
   const [placedBet, setPlacedBet] = useState(0);
   const [playerMove, setPlayerMove] = useState<Move | null>(null);
@@ -52,8 +58,42 @@ export default function GameInterface() {
   const [searchTerm, setSearchTerm] = useState('');
   const [isSuggestionsPopoverOpen, setIsSuggestionsPopoverOpen] = useState(false);
 
-
   const { toast } = useToast();
+
+  // Effect to update HomePage about coin changes
+  useEffect(() => {
+    if (onCoinsChange) {
+      onCoinsChange(coins);
+    }
+  }, [coins, onCoinsChange]);
+
+  // Effect to initialize game from external lobby config
+  useEffect(() => {
+    if (initialLobbyConfig && !isProcessing) { // Make sure we are not already in a game operation
+      // Prevent re-initializing if the lobby ID is the same (e.g. hot reload)
+      if (lobbyId === initialLobbyConfig.lobbyId && gameState === 'waiting_for_friend') return;
+
+      setOpponentName(initialLobbyConfig.friendName);
+      setPlacedBet(initialLobbyConfig.betAmount);
+      setLobbyId(initialLobbyConfig.lobbyId);
+      
+      // Reset other states for a fresh game start
+      setPlayerMove(null);
+      setOpponentMove(null);
+      setResultText('');
+      setStatusMessage(''); // Will be set by 'waiting_for_friend' state effect
+      setIsProcessing(false); // Ensure not stuck in processing
+      setSelectedFriendForLobby(null); // Clear friend selection from internal flow
+      setSearchTerm(''); // Clear search term
+
+      setGameState('waiting_for_friend');
+      
+      if (onLobbyInitialized) {
+        onLobbyInitialized(); // Signal that config has been consumed
+      }
+    }
+  }, [initialLobbyConfig, onLobbyInitialized, isProcessing, lobbyId, gameState]);
+
 
   useEffect(() => {
     let gameStartTimer: NodeJS.Timeout;
@@ -61,9 +101,13 @@ export default function GameInterface() {
       setIsProcessing(true);
       let currentStatus = '';
       if (gameState === 'waiting_for_friend' && lobbyId && opponentName) {
-        currentStatus = `Lobby ID: ${lobbyId}. Share this ID with ${opponentName} to invite them! Waiting for ${opponentName} to join...`;
-      } else { // searching_for_random
-        currentStatus = `Searching for ${opponentName} at ${placedBet} coins...`;
+        // Make sure opponentName is not the default "Opponent" if we expect a friend
+        const displayOpponent = opponentName === "Opponent" ? "your friend" : opponentName;
+        currentStatus = `Lobby ID: ${lobbyId}. Share this ID with ${displayOpponent} to invite them! Waiting for ${displayOpponent} to join...`;
+      } else if (gameState === 'searching_for_random' && opponentName !== "Opponent") { // opponentName should be "Random Player"
+         currentStatus = `Searching for ${opponentName} at ${placedBet} coins...`;
+      } else {
+        currentStatus = `Searching for a random player at ${placedBet} coins...`;
       }
       setStatusMessage(currentStatus);
 
@@ -125,12 +169,14 @@ export default function GameInterface() {
     setResultText('');
     setStatusMessage('');
     setIsProcessing(false);
+    // Do not reset opponentName here as it might be set by lobby creation flow
   };
 
   const handleCreateLobbyIntent = () => {
     resetCommonStates();
     setSelectedFriendForLobby(null); 
     setSearchTerm('');
+    setOpponentName("Friend"); // Default for this flow
     setGameState('selecting_bet_for_lobby');
   };
 
@@ -142,10 +188,11 @@ export default function GameInterface() {
     }
     if (amount > coins) {
       toast({ title: 'Insufficient Coins', description: 'You do not have enough coins to create a lobby with this bet.', variant: 'destructive' });
+      setIsTopUpDialogOpen(true);
       return;
     }
     setPlacedBet(amount);
-    setOpponentName(selectedFriendForLobby);
+    setOpponentName(selectedFriendForLobby); // Set opponentName to the selected friend
     const newLobbyId = `LB${Math.random().toString(36).substring(2, 5).toUpperCase()}`;
     setLobbyId(newLobbyId);
     resetCommonStates(); 
@@ -156,6 +203,7 @@ export default function GameInterface() {
     if (isProcessing) return;
     if (amount > coins) {
       toast({ title: 'Insufficient Coins', description: 'You do not have enough coins to join a game with this bet.', variant: 'destructive' });
+      setIsTopUpDialogOpen(true);
       return;
     }
     setPlacedBet(amount);
@@ -175,7 +223,7 @@ export default function GameInterface() {
     resetCommonStates();
     setPlacedBet(0);
     setLobbyId(null);
-    setOpponentName("Opponent");
+    setOpponentName("Opponent"); // Reset to default
     setSelectedFriendForLobby(null);
     setSearchTerm('');
     setIsSuggestionsPopoverOpen(false);
@@ -184,11 +232,13 @@ export default function GameInterface() {
 
   const handleRematch = () => {
     if (coins < placedBet) {
-      toast({ title: 'Insufficient Coins for Rematch', description: 'Returning to main menu.', variant: 'destructive' });
-      handleCancelAndReturnToInitial();
+      toast({ title: 'Insufficient Coins for Rematch', description: 'You need more coins. Returning to main menu.', variant: 'destructive' });
+      setIsTopUpDialogOpen(true); // Prompt to buy coins
+      handleCancelAndReturnToInitial(); // Optionally, still go to main menu
       return;
     }
     resetCommonStates();
+    // opponentName and placedBet remain from previous game
     setGameState('choosing_move');
   };
 
@@ -212,7 +262,7 @@ export default function GameInterface() {
   const handleSearchTermChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newSearchTerm = e.target.value;
     setSearchTerm(newSearchTerm);
-    setSelectedFriendForLobby(null); // Clear selected friend if user types again
+    setSelectedFriendForLobby(null); 
 
     if (newSearchTerm.trim() === '') {
       setIsSuggestionsPopoverOpen(false);
@@ -225,7 +275,7 @@ export default function GameInterface() {
   };
 
   const handleSuggestionClick = (friendName: string) => {
-    setSelectedFriendForLobby(friendName);
+    setSelectedFriendForLobby(friendName.replace(" (Simulated)", "")); // Store without "(Simulated)"
     setSearchTerm(friendName); 
     setIsSuggestionsPopoverOpen(false);
   };
@@ -298,7 +348,7 @@ export default function GameInterface() {
                   <Button
                     key={`join-${amount}`}
                     onClick={() => handleJoinRandomGame(amount)}
-                    className="rounded-full w-28 h-28 flex flex-col items-center justify-center p-3 text-lg bg-accent hover:bg-accent/90 text-accent-foreground shadow-md transform transition-transform hover:scale-105"
+                    className="rounded-full w-28 h-28 flex flex-col items-center justify-center p-3 text-lg bg-accent hover:bg-accent/90 text-accent-foreground shadow-md transform transition-transform hover:scale-105 disabled:opacity-70 disabled:cursor-not-allowed"
                     disabled={isProcessing || amount > coins}
                     aria-label={`Join random game with ${amount} coins bet`}
                   >
@@ -313,10 +363,10 @@ export default function GameInterface() {
           {gameState === 'selecting_bet_for_lobby' && !isProcessing && (
             <div className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="friend-search" className="text-md font-semibold text-muted-foreground">Invite a Friend:</Label>
+                <Label htmlFor="friend-search" className="text-md font-semibold text-muted-foreground">Invite a Friend (Simulated Search):</Label>
                 <Popover open={isSuggestionsPopoverOpen} onOpenChange={setIsSuggestionsPopoverOpen}>
                   <PopoverTrigger asChild>
-                     <div className="relative w-full"> {/* Wrapper for Popover Anchor */}
+                     <div className="relative w-full">
                         <Input
                           id="friend-search"
                           type="text"
@@ -336,14 +386,14 @@ export default function GameInterface() {
                   <PopoverContent 
                     className="w-[--radix-popover-trigger-width] p-0" 
                     align="start"
-                    onOpenAutoFocus={(e) => e.preventDefault()}
+                    onOpenAutoFocus={(e) => e.preventDefault()} // Prevent stealing focus
                   >
                     <div className="max-h-40 overflow-y-auto">
                     {filteredSuggestions.map((friend) => (
                       <div
                         key={friend}
-                        className="px-3 py-2 text-sm cursor-pointer hover:bg-accent"
-                        onMouseDown={() => handleSuggestionClick(friend)}
+                        className="px-3 py-2 text-sm cursor-pointer hover:bg-accent hover:text-accent-foreground"
+                        onMouseDown={() => handleSuggestionClick(friend)} // Use onMouseDown to fire before blur
                       >
                         {friend}
                       </div>
@@ -354,6 +404,7 @@ export default function GameInterface() {
                     </div>
                   </PopoverContent>
                 </Popover>
+                 {selectedFriendForLobby && <p className="text-sm text-green-600">Selected: {selectedFriendForLobby}</p>}
               </div>
               
               <div>
@@ -363,7 +414,7 @@ export default function GameInterface() {
                     <Button
                       key={`create-bet-${amount}`}
                       onClick={() => handleFinalizeLobbyWithFriendAndBet(amount)}
-                      className="rounded-full w-28 h-28 flex flex-col items-center justify-center p-3 text-lg bg-accent hover:bg-accent/90 text-accent-foreground shadow-md transform transition-transform hover:scale-105"
+                      className="rounded-full w-28 h-28 flex flex-col items-center justify-center p-3 text-lg bg-accent hover:bg-accent/90 text-accent-foreground shadow-md transform transition-transform hover:scale-105 disabled:opacity-70 disabled:cursor-not-allowed"
                       disabled={isProcessing || amount > coins || !selectedFriendForLobby}
                       aria-label={`Create lobby with ${selectedFriendForLobby || 'friend'} with ${amount} coins bet`}
                     >
@@ -380,7 +431,7 @@ export default function GameInterface() {
           )}
 
           {(gameState === 'waiting_for_friend' || gameState === 'searching_for_random') && isProcessing && (
-             <Button onClick={handleCancelAndReturnToInitial} variant="outline" className="w-full mt-auto">
+             <Button onClick={handleCancelAndReturnToInitial} variant="outline" className="w-full mt-auto self-center max-w-xs">
               <XCircle className="mr-2"/> Cancel Search/Lobby
             </Button>
           )}
@@ -427,7 +478,7 @@ export default function GameInterface() {
                       onClick={handleRematch}
                       variant="default"
                       size="icon"
-                      className="rounded-full w-16 h-16"
+                      className="rounded-full w-16 h-16 disabled:opacity-70 disabled:cursor-not-allowed"
                       disabled={isProcessing || coins < placedBet}
                       aria-label={`Rematch ${opponentName} for ${placedBet} coins`}
                     >
@@ -436,6 +487,7 @@ export default function GameInterface() {
                   </TooltipTrigger>
                   <TooltipContent>
                     <p>Rematch {opponentName} ({placedBet} coins)</p>
+                    {coins < placedBet && <p className="text-destructive">Not enough coins!</p>}
                   </TooltipContent>
                 </Tooltip>
                 <Tooltip>
@@ -478,4 +530,3 @@ export default function GameInterface() {
     </TooltipProvider>
   );
 }
-

@@ -5,10 +5,14 @@ import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { UserPlus, Users, Trash2 } from 'lucide-react';
+import { UserPlus, Users, Trash2, Send } from 'lucide-react'; // Added Send icon
 import { Badge } from '@/components/ui/badge';
 
-export default function FriendManagement() {
+interface FriendManagementProps {
+  onInviteFriend: (friendName: string) => void;
+}
+
+export default function FriendManagement({ onInviteFriend }: FriendManagementProps) {
   const [friends, setFriends] = useState<string[]>(['Alice (Simulated)', 'Bob (Simulated)']);
   const [newFriendName, setNewFriendName] = useState('');
 
@@ -34,7 +38,7 @@ export default function FriendManagement() {
           Friend Zone (Simulated)
         </CardTitle>
         <CardDescription>
-          Add and manage your list of friends. This is a simulated feature for prototyping.
+          Add friends and invite them to a game. This is a simulated feature.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -57,17 +61,28 @@ export default function FriendManagement() {
           {friends.length > 0 ? (
             <div className="space-y-2 bg-muted/20 p-4 rounded-lg max-h-48 overflow-y-auto">
               {friends.map((friend) => (
-                <div key={friend} className="flex items-center justify-between p-2 rounded-md hover:bg-muted/40 transition-colors">
+                <div key={friend} className="flex items-center justify-between p-2 rounded-md hover:bg-muted/40 transition-colors group">
                   <Badge variant="secondary" className="text-sm">{friend}</Badge>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-7 w-7 text-muted-foreground hover:text-destructive"
-                    onClick={() => handleRemoveFriend(friend)}
-                    aria-label={`Remove ${friend}`}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <div className="flex items-center space-x-1">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-7 w-7 text-muted-foreground hover:text-primary"
+                      onClick={() => onInviteFriend(friend.replace(" (Simulated)", ""))} // Pass friend name without (Simulated)
+                      aria-label={`Invite ${friend} to game`}
+                    >
+                      <Send className="h-4 w-4" />
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                      onClick={() => handleRemoveFriend(friend)}
+                      aria-label={`Remove ${friend}`}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>
