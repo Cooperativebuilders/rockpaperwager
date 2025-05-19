@@ -91,12 +91,25 @@ export default function GameInterface() {
     setGameState('revealing');
   };
 
-  const handlePlayAgain = () => {
+  const handleLeave = () => {
     setGameState('betting');
     setPlayerMove(null);
     setOpponentMove(null);
     setResultText('');
     setPlacedBet(0);
+  };
+
+  const handleRematch = () => {
+    if (coins < placedBet) {
+      toast({ title: 'Insufficient Coins for Rematch', description: 'You do not have enough coins for the current bet. Returning to bet selection.', variant: 'destructive' });
+      handleLeave(); // Go back to betting screen if not enough coins
+      return;
+    }
+    setGameState('choosing');
+    setPlayerMove(null);
+    setOpponentMove(null);
+    setResultText('');
+    // PlacedBet remains the same
   };
 
   const renderMoveButton = (move: Move) => {
@@ -183,13 +196,21 @@ export default function GameInterface() {
       </CardContent>
 
       {gameState === 'result' && (
-        <CardFooter className="p-6">
+        <CardFooter className="p-6 flex flex-col sm:flex-row gap-4">
           <Button
-            onClick={handlePlayAgain}
-            className="w-full text-lg p-6"
+            onClick={handleRematch}
+            className="flex-1 text-lg p-6"
+            variant="default"
+            disabled={coins < placedBet}
+          >
+            Rematch ({placedBet} coins)
+          </Button>
+          <Button
+            onClick={handleLeave}
+            className="flex-1 text-lg p-6"
             variant="outline"
           >
-            Play Again (Main Menu)
+            Leave (Main Menu)
           </Button>
         </CardFooter>
       )}
