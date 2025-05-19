@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { HandMetal, Hand, Scissors, Wallet, Users, UserPlus, DoorOpen, XCircle, Hourglass, Repeat } from 'lucide-react';
@@ -12,8 +12,10 @@ import { cn } from '@/lib/utils';
 import { CoinDisplay } from '@/components/coin-display';
 import { TopUpDialog } from '@/components/top-up-dialog';
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
+
 
 type GameState =
   | 'initial'
@@ -31,7 +33,7 @@ const MOVE_ICONS: Record<Move, React.ElementType> = {
 };
 
 const BET_AMOUNTS = [10, 100, 1000];
-const SIMULATED_FRIENDS_LIST = ['Alice (Simulated)', 'Bob (Simulated)', 'Charlie (Simulated)', 'Dave (Simulated)'];
+const SIMULATED_FRIENDS_LIST = ['Alice (Simulated)', 'Bob (Simulated)', 'Charlie (Simulated)', 'Dave (Simulated)', 'Eve (Simulated)', 'Mallory (Simulated)'];
 
 export default function GameInterface() {
   const [coins, setCoins] = useState(1000);
@@ -45,7 +47,11 @@ export default function GameInterface() {
   const [statusMessage, setStatusMessage] = useState('');
   const [opponentName, setOpponentName] = useState("Opponent");
   const [isTopUpDialogOpen, setIsTopUpDialogOpen] = useState(false);
+  
   const [selectedFriendForLobby, setSelectedFriendForLobby] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isSuggestionsPopoverOpen, setIsSuggestionsPopoverOpen] = useState(false);
+
 
   const { toast } = useToast();
 
@@ -119,19 +125,19 @@ export default function GameInterface() {
     setResultText('');
     setStatusMessage('');
     setIsProcessing(false);
-    // Keep selectedFriendForLobby unless explicitly cleared for a new lobby creation flow
   };
 
   const handleCreateLobbyIntent = () => {
     resetCommonStates();
-    setSelectedFriendForLobby(null); // Reset selected friend when starting a new lobby creation
+    setSelectedFriendForLobby(null); 
+    setSearchTerm('');
     setGameState('selecting_bet_for_lobby');
   };
 
   const handleFinalizeLobbyWithFriendAndBet = (amount: number) => {
     if (isProcessing) return;
     if (!selectedFriendForLobby) {
-      toast({ title: 'Friend Not Selected', description: 'Please select a friend to invite to the lobby.', variant: 'destructive' });
+      toast({ title: 'Friend Not Selected', description: 'Please select a friend from the suggestions to invite.', variant: 'destructive' });
       return;
     }
     if (amount > coins) {
@@ -142,7 +148,7 @@ export default function GameInterface() {
     setOpponentName(selectedFriendForLobby);
     const newLobbyId = `LB${Math.random().toString(36).substring(2, 5).toUpperCase()}`;
     setLobbyId(newLobbyId);
-    resetCommonStates(); // Reset moves, results, etc.
+    resetCommonStates(); 
     setGameState('waiting_for_friend');
   };
 
@@ -171,6 +177,8 @@ export default function GameInterface() {
     setLobbyId(null);
     setOpponentName("Opponent");
     setSelectedFriendForLobby(null);
+    setSearchTerm('');
+    setIsSuggestionsPopoverOpen(false);
     setGameState('initial');
   };
 
@@ -201,6 +209,27 @@ export default function GameInterface() {
     });
   };
 
+  const handleSearchTermChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newSearchTerm = e.target.value;
+    setSearchTerm(newSearchTerm);
+    setSelectedFriendForLobby(null); // Clear selected friend if user types again
+
+    if (newSearchTerm.trim() === '') {
+      setIsSuggestionsPopoverOpen(false);
+    } else {
+      const filtered = SIMULATED_FRIENDS_LIST.filter(friend =>
+        friend.toLowerCase().includes(newSearchTerm.toLowerCase())
+      );
+      setIsSuggestionsPopoverOpen(filtered.length > 0);
+    }
+  };
+
+  const handleSuggestionClick = (friendName: string) => {
+    setSelectedFriendForLobby(friendName);
+    setSearchTerm(friendName); 
+    setIsSuggestionsPopoverOpen(false);
+  };
+
   const renderMoveButton = (move: Move) => {
     const IconComponent = MOVE_ICONS[move];
     return (
@@ -222,7 +251,7 @@ export default function GameInterface() {
   const getCardTitle = () => {
     switch (gameState) {
       case 'initial': return "Choose Your Path";
-      case 'selecting_bet_for_lobby': return "Create Lobby with Friend";
+      case 'selecting_bet_for_lobby': return "Create Lobby";
       case 'waiting_for_friend': return `Lobby with ${opponentName}`;
       case 'searching_for_random': return `Searching for ${opponentName}`;
       case 'choosing_move': return `Your Turn vs ${opponentName} (Bet: ${placedBet})`;
@@ -232,6 +261,10 @@ export default function GameInterface() {
       default: return "Rock Paper Wager";
     }
   };
+  
+  const filteredSuggestions = SIMULATED_FRIENDS_LIST.filter(friend =>
+    friend.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <TooltipProvider>
@@ -280,17 +313,47 @@ export default function GameInterface() {
           {gameState === 'selecting_bet_for_lobby' && !isProcessing && (
             <div className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="friend-select" className="text-md font-semibold text-muted-foreground">Invite a Friend:</Label>
-                <Select onValueChange={setSelectedFriendForLobby} value={selectedFriendForLobby || undefined}>
-                  <SelectTrigger id="friend-select" className="w-full">
-                    <SelectValue placeholder="Select a friend to invite" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {SIMULATED_FRIENDS_LIST.map(friend => (
-                      <SelectItem key={friend} value={friend}>{friend}</SelectItem>
+                <Label htmlFor="friend-search" className="text-md font-semibold text-muted-foreground">Invite a Friend:</Label>
+                <Popover open={isSuggestionsPopoverOpen} onOpenChange={setIsSuggestionsPopoverOpen}>
+                  <PopoverTrigger asChild>
+                     <div className="relative w-full"> {/* Wrapper for Popover Anchor */}
+                        <Input
+                          id="friend-search"
+                          type="text"
+                          placeholder="Type to search friends..."
+                          value={searchTerm}
+                          onChange={handleSearchTermChange}
+                          onFocus={() => {
+                            if (searchTerm.trim() && filteredSuggestions.length > 0) {
+                              setIsSuggestionsPopoverOpen(true);
+                            }
+                          }}
+                          autoComplete="off"
+                          className="w-full"
+                        />
+                      </div>
+                  </PopoverTrigger>
+                  <PopoverContent 
+                    className="w-[--radix-popover-trigger-width] p-0" 
+                    align="start"
+                    onOpenAutoFocus={(e) => e.preventDefault()}
+                  >
+                    <div className="max-h-40 overflow-y-auto">
+                    {filteredSuggestions.map((friend) => (
+                      <div
+                        key={friend}
+                        className="px-3 py-2 text-sm cursor-pointer hover:bg-accent"
+                        onMouseDown={() => handleSuggestionClick(friend)}
+                      >
+                        {friend}
+                      </div>
                     ))}
-                  </SelectContent>
-                </Select>
+                    {filteredSuggestions.length === 0 && searchTerm.trim() !== '' && (
+                       <div className="px-3 py-2 text-sm text-muted-foreground">No friends found.</div>
+                    )}
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </div>
               
               <div>
@@ -415,3 +478,4 @@ export default function GameInterface() {
     </TooltipProvider>
   );
 }
+
