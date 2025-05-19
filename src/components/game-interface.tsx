@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { HandMetal, Hand, Scissors, Dices, Wallet, Users, UserPlus, DoorOpen, XCircle, Hourglass, Repeat } from 'lucide-react';
+import { HandMetal, Hand, Scissors, Wallet, Users, UserPlus, DoorOpen, XCircle, Hourglass, Repeat } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import type { Move, Outcome } from '@/lib/game';
 import { MOVES, determineWinner, MOVE_EMOJIS } from '@/lib/game';
@@ -28,7 +28,6 @@ const MOVE_ICONS: Record<Move, React.ElementType> = {
 };
 
 const BET_AMOUNTS = [10, 100, 1000];
-const SIMULATED_OPPONENT_NAME = "Opponent"; // Could be "Friend" or "Random Player" contextually
 
 export default function GameInterface() {
   const [coins, setCoins] = useState(1000);
@@ -40,6 +39,7 @@ export default function GameInterface() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [lobbyId, setLobbyId] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState('');
+  const [opponentName, setOpponentName] = useState("Opponent");
 
   const { toast } = useToast();
 
@@ -48,16 +48,20 @@ export default function GameInterface() {
     let gameStartTimer: NodeJS.Timeout;
     if (gameState === 'waiting_for_friend' || gameState === 'searching_for_random') {
       setIsProcessing(true);
-      setStatusMessage(gameState === 'waiting_for_friend' ? `Lobby ID: ${lobbyId}. Waiting for friend...` : `Searching for opponent at ${placedBet} coins...`);
+      setStatusMessage(
+        gameState === 'waiting_for_friend' 
+          ? `Lobby ID: ${lobbyId}. Waiting for ${opponentName} to join...` 
+          : `Searching for ${opponentName} at ${placedBet} coins...`
+      );
       gameStartTimer = setTimeout(() => {
-        toast({ title: "Opponent Found!", description: "The game is about to begin.", variant: 'default' });
+        toast({ title: `${opponentName} Found!`, description: "The game is about to begin.", variant: 'default' });
         setGameState('choosing_move');
         setIsProcessing(false);
         setStatusMessage('');
       }, 3000); // Simulate 3 second wait
     }
     return () => clearTimeout(gameStartTimer);
-  }, [gameState, lobbyId, placedBet, toast]);
+  }, [gameState, lobbyId, placedBet, toast, opponentName]);
 
 
   // Game reveal logic
@@ -65,7 +69,7 @@ export default function GameInterface() {
     let revealTimer: NodeJS.Timeout;
     if (gameState === 'revealing_moves' && playerMove) {
       setIsProcessing(true);
-      setStatusMessage(`You played ${MOVE_EMOJIS[playerMove]}. Waiting for ${SIMULATED_OPPONENT_NAME}...`);
+      setStatusMessage(`You played ${MOVE_EMOJIS[playerMove]}. Waiting for ${opponentName}...`);
       const randomOpponentMove = MOVES[Math.floor(Math.random() * MOVES.length)];
       setOpponentMove(randomOpponentMove);
 
@@ -101,7 +105,7 @@ export default function GameInterface() {
       }, 1500); // Reveal delay
     }
     return () => clearTimeout(revealTimer);
-  }, [gameState, playerMove, placedBet, coins, toast]);
+  }, [gameState, playerMove, placedBet, coins, toast, opponentName]);
 
 
   const resetCommonStates = () => {
@@ -124,8 +128,9 @@ export default function GameInterface() {
       return;
     }
     setPlacedBet(amount);
-    const newLobbyId = `LB${Math.random().toString(36).substr(2, 5).toUpperCase()}`;
+    const newLobbyId = `LB${Math.random().toString(36).substring(2, 5).toUpperCase()}`;
     setLobbyId(newLobbyId);
+    setOpponentName("Friend"); // Set opponent name for lobby
     resetCommonStates();
     setGameState('waiting_for_friend');
   };
@@ -138,6 +143,7 @@ export default function GameInterface() {
     }
     setPlacedBet(amount);
     setLobbyId(null); // Not a created lobby
+    setOpponentName("Random Player"); // Set opponent name for random game
     resetCommonStates();
     setGameState('searching_for_random');
   };
@@ -152,6 +158,7 @@ export default function GameInterface() {
     resetCommonStates();
     setPlacedBet(0);
     setLobbyId(null);
+    setOpponentName("Opponent"); // Reset opponent name
     setGameState('initial');
   };
 
@@ -162,6 +169,7 @@ export default function GameInterface() {
       return;
     }
     resetCommonStates();
+    // OpponentName remains the same for a rematch
     setGameState('choosing_move');
   };
 
@@ -188,12 +196,12 @@ export default function GameInterface() {
     switch (gameState) {
       case 'initial': return "Choose Your Path";
       case 'selecting_bet_for_lobby': return "Select Bet for Lobby";
-      case 'waiting_for_friend': return "Lobby Created";
-      case 'searching_for_random': return "Searching for Game";
-      case 'choosing_move': return `Your Turn (Bet: ${placedBet})`;
+      case 'waiting_for_friend': return `Lobby with ${opponentName}`;
+      case 'searching_for_random': return `Searching for ${opponentName}`;
+      case 'choosing_move': return `Your Turn vs ${opponentName} (Bet: ${placedBet})`;
       case 'revealing_moves':
       case 'game_result':
-        return "Results";
+        return `Results vs ${opponentName}`;
       default: return "Rock Paper Wager";
     }
   };
@@ -222,7 +230,7 @@ export default function GameInterface() {
           {gameState === 'initial' && !isProcessing && (
             <div className="space-y-4">
               <Button onClick={handleCreateLobbyIntent} size="lg" className="w-full p-6 text-lg">
-                <Users className="mr-2" /> Create a Lobby
+                <Users className="mr-2" /> Create a Lobby (vs Friend)
               </Button>
               <p className="text-center text-muted-foreground my-4">Or Join a Random Game:</p>
               <div className="flex flex-col sm:flex-row sm:gap-4 items-center sm:justify-around">
@@ -266,8 +274,8 @@ export default function GameInterface() {
           )}
           
           {(gameState === 'waiting_for_friend' || gameState === 'searching_for_random') && isProcessing && (
-            <Button onClick={handleCancelAndReturnToInitial} variant="outline" className="w-full mt-auto">
-              <XCircle className="mr-2"/> Cancel
+             <Button onClick={handleCancelAndReturnToInitial} variant="outline" className="w-full mt-auto">
+              <XCircle className="mr-2"/> Cancel Search/Lobby
             </Button>
           )}
 
@@ -287,7 +295,7 @@ export default function GameInterface() {
               )}
               {opponentMove && (
                 <p className="text-2xl font-semibold">
-                  {SIMULATED_OPPONENT_NAME} played: <span className="text-destructive">{MOVE_EMOJIS[opponentMove]} {opponentMove}</span>
+                  {opponentName} played: <span className="text-destructive">{MOVE_EMOJIS[opponentMove]} {opponentMove}</span>
                 </p>
               )}
               {resultText && (
@@ -316,13 +324,13 @@ export default function GameInterface() {
                       size="icon"
                       className="rounded-full w-16 h-16"
                       disabled={isProcessing || coins < placedBet}
-                      aria-label={`Rematch for ${placedBet} coins`}
+                      aria-label={`Rematch ${opponentName} for ${placedBet} coins`}
                     >
                       <Repeat className="w-8 h-8" />
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Rematch ({placedBet} coins)</p>
+                    <p>Rematch {opponentName} ({placedBet} coins)</p>
                   </TooltipContent>
                 </Tooltip>
                 <Tooltip>
@@ -351,7 +359,7 @@ export default function GameInterface() {
                 size="lg"
                 variant="outline"
               >
-                <DoorOpen className="mr-2"/> Leave to Main Menu
+                <DoorOpen className="mr-2"/> Leave Game
               </Button>
             }
           </CardFooter>

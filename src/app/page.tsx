@@ -1,5 +1,6 @@
 
 import GameInterface from '@/components/game-interface';
+import FriendManagement from '@/components/friend-management';
 
 export default function HomePage() {
   return (
@@ -9,11 +10,12 @@ export default function HomePage() {
           Rock Paper Wager
         </h1>
         <p className="mt-2 text-lg text-muted-foreground">
-          Create a lobby, invite friends, or join a random game. Wager your coins and prove your skill!
+          Create a lobby to play with a friend, or join a random game. Wager your coins and prove your skill!
         </p>
       </header>
-      <main className="w-full max-w-lg">
+      <main className="w-full max-w-lg space-y-8">
         <GameInterface />
+        <FriendManagement />
       </main>
       <footer className="mt-12 text-center text-sm text-muted-foreground">
         <p>&copy; {new Date().getFullYear()} Rock Paper Wager. All rights reserved.</p>
