@@ -15,7 +15,7 @@ import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/comp
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
-import type { LobbyConfig } from '@/app/page'; // Import LobbyConfig
+import type { LobbyConfig } from '@/app/page';
 
 type GameState =
   | 'initial'
@@ -38,10 +38,11 @@ const SIMULATED_FRIENDS_LIST = ['Alice (Simulated)', 'Bob (Simulated)', 'Charlie
 interface GameInterfaceProps {
   initialLobbyConfig?: LobbyConfig | null;
   onLobbyInitialized?: () => void;
-  onCoinsChange?: (newCoinAmount: number) => void; // Callback to notify HomePage of coin changes
+  onCoinsChange?: (newCoinAmount: number) => void;
+  onActiveGameChange?: (isActive: boolean) => void; // New prop
 }
 
-export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, onCoinsChange }: GameInterfaceProps) {
+export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, onCoinsChange, onActiveGameChange }: GameInterfaceProps) {
   const [coins, setCoins] = useState(1000);
   const [placedBet, setPlacedBet] = useState(0);
   const [playerMove, setPlayerMove] = useState<Move | null>(null);
@@ -60,36 +61,39 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
 
   const { toast } = useToast();
 
-  // Effect to update HomePage about coin changes
   useEffect(() => {
     if (onCoinsChange) {
       onCoinsChange(coins);
     }
   }, [coins, onCoinsChange]);
 
-  // Effect to initialize game from external lobby config
   useEffect(() => {
-    if (initialLobbyConfig && !isProcessing) { // Make sure we are not already in a game operation
-      // Prevent re-initializing if the lobby ID is the same (e.g. hot reload)
+    if (onActiveGameChange) {
+      const activeStates: GameState[] = ['waiting_for_friend', 'searching_for_random', 'choosing_move', 'revealing_moves', 'game_result'];
+      onActiveGameChange(activeStates.includes(gameState));
+    }
+  }, [gameState, onActiveGameChange]);
+
+  useEffect(() => {
+    if (initialLobbyConfig && !isProcessing) {
       if (lobbyId === initialLobbyConfig.lobbyId && gameState === 'waiting_for_friend') return;
 
       setOpponentName(initialLobbyConfig.friendName);
       setPlacedBet(initialLobbyConfig.betAmount);
       setLobbyId(initialLobbyConfig.lobbyId);
       
-      // Reset other states for a fresh game start
       setPlayerMove(null);
       setOpponentMove(null);
       setResultText('');
-      setStatusMessage(''); // Will be set by 'waiting_for_friend' state effect
-      setIsProcessing(false); // Ensure not stuck in processing
-      setSelectedFriendForLobby(null); // Clear friend selection from internal flow
-      setSearchTerm(''); // Clear search term
+      setStatusMessage('');
+      setIsProcessing(false);
+      setSelectedFriendForLobby(null);
+      setSearchTerm('');
 
       setGameState('waiting_for_friend');
       
       if (onLobbyInitialized) {
-        onLobbyInitialized(); // Signal that config has been consumed
+        onLobbyInitialized();
       }
     }
   }, [initialLobbyConfig, onLobbyInitialized, isProcessing, lobbyId, gameState]);
@@ -101,10 +105,9 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
       setIsProcessing(true);
       let currentStatus = '';
       if (gameState === 'waiting_for_friend' && lobbyId && opponentName) {
-        // Make sure opponentName is not the default "Opponent" if we expect a friend
         const displayOpponent = opponentName === "Opponent" ? "your friend" : opponentName;
         currentStatus = `Lobby ID: ${lobbyId}. Share this ID with ${displayOpponent} to invite them! Waiting for ${displayOpponent} to join...`;
-      } else if (gameState === 'searching_for_random' && opponentName !== "Opponent") { // opponentName should be "Random Player"
+      } else if (gameState === 'searching_for_random' && opponentName !== "Opponent") {
          currentStatus = `Searching for ${opponentName} at ${placedBet} coins...`;
       } else {
         currentStatus = `Searching for a random player at ${placedBet} coins...`;
@@ -169,14 +172,13 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
     setResultText('');
     setStatusMessage('');
     setIsProcessing(false);
-    // Do not reset opponentName here as it might be set by lobby creation flow
   };
 
   const handleCreateLobbyIntent = () => {
     resetCommonStates();
     setSelectedFriendForLobby(null); 
     setSearchTerm('');
-    setOpponentName("Friend"); // Default for this flow
+    setOpponentName("Friend");
     setGameState('selecting_bet_for_lobby');
   };
 
@@ -192,7 +194,7 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
       return;
     }
     setPlacedBet(amount);
-    setOpponentName(selectedFriendForLobby); // Set opponentName to the selected friend
+    setOpponentName(selectedFriendForLobby);
     const newLobbyId = `LB${Math.random().toString(36).substring(2, 5).toUpperCase()}`;
     setLobbyId(newLobbyId);
     resetCommonStates(); 
@@ -223,7 +225,7 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
     resetCommonStates();
     setPlacedBet(0);
     setLobbyId(null);
-    setOpponentName("Opponent"); // Reset to default
+    setOpponentName("Opponent");
     setSelectedFriendForLobby(null);
     setSearchTerm('');
     setIsSuggestionsPopoverOpen(false);
@@ -233,12 +235,11 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
   const handleRematch = () => {
     if (coins < placedBet) {
       toast({ title: 'Insufficient Coins for Rematch', description: 'You need more coins. Returning to main menu.', variant: 'destructive' });
-      setIsTopUpDialogOpen(true); // Prompt to buy coins
-      handleCancelAndReturnToInitial(); // Optionally, still go to main menu
+      setIsTopUpDialogOpen(true);
+      handleCancelAndReturnToInitial();
       return;
     }
     resetCommonStates();
-    // opponentName and placedBet remain from previous game
     setGameState('choosing_move');
   };
 
@@ -275,7 +276,7 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
   };
 
   const handleSuggestionClick = (friendName: string) => {
-    setSelectedFriendForLobby(friendName.replace(" (Simulated)", "")); // Store without "(Simulated)"
+    setSelectedFriendForLobby(friendName.replace(" (Simulated)", ""));
     setSearchTerm(friendName); 
     setIsSuggestionsPopoverOpen(false);
   };
@@ -386,14 +387,14 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
                   <PopoverContent 
                     className="w-[--radix-popover-trigger-width] p-0" 
                     align="start"
-                    onOpenAutoFocus={(e) => e.preventDefault()} // Prevent stealing focus
+                    onOpenAutoFocus={(e) => e.preventDefault()}
                   >
                     <div className="max-h-40 overflow-y-auto">
                     {filteredSuggestions.map((friend) => (
                       <div
                         key={friend}
                         className="px-3 py-2 text-sm cursor-pointer hover:bg-accent hover:text-accent-foreground"
-                        onMouseDown={() => handleSuggestionClick(friend)} // Use onMouseDown to fire before blur
+                        onMouseDown={() => handleSuggestionClick(friend)}
                       >
                         {friend}
                       </div>
