@@ -20,6 +20,7 @@ const MOVE_ICONS: Record<Move, React.ElementType> = {
 };
 
 const BET_AMOUNTS = [10, 100, 1000];
+const OPPONENT_NAME = "AI Bot";
 
 export default function GameInterface() {
   const [coins, setCoins] = useState(1000);
@@ -72,7 +73,7 @@ export default function GameInterface() {
 
 
   const handleSelectBet = (amount: number) => {
-    if (isProcessing) return; 
+    if (isProcessing) return;
 
     if (amount > coins) {
       toast({ title: 'Insufficient Coins', description: 'You do not have enough coins for this bet.', variant: 'destructive' });
@@ -163,12 +164,12 @@ export default function GameInterface() {
             )}
             {gameState === 'revealing' && !opponentMove && (
                 <div className="flex items-center justify-center text-2xl font-semibold text-muted-foreground py-4">
-                    <Dices className="animate-spin h-8 w-8 mr-3" /> Waiting for opponent...
+                    <Dices className="animate-spin h-8 w-8 mr-3" /> Waiting for {OPPONENT_NAME}...
                 </div>
             )}
             {opponentMove && (
               <p className="text-2xl font-semibold">
-                Opponent chose: <span className="text-destructive">{MOVE_EMOJIS[opponentMove]} {opponentMove}</span>
+                {OPPONENT_NAME} chose: <span className="text-destructive">{MOVE_EMOJIS[opponentMove]} {opponentMove}</span>
               </p>
             )}
              {resultText && <p className={cn(
@@ -188,7 +189,7 @@ export default function GameInterface() {
             className="w-full text-lg p-6"
             variant="outline"
           >
-            Play Again
+            Play Again (Main Menu)
           </Button>
         </CardFooter>
       )}
