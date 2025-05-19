@@ -173,6 +173,16 @@ export default function GameInterface() {
     setGameState('choosing_move');
   };
 
+  const handlePurchaseCoins = () => {
+    const purchaseAmount = 500; // Simulated purchase amount
+    setCoins(prevCoins => prevCoins + purchaseAmount);
+    toast({
+      title: "Coins Added!",
+      description: `You've (simulated) purchased ${purchaseAmount} coins. Your balance is updated.`,
+      variant: 'default'
+    });
+  };
+
 
   const renderMoveButton = (move: Move) => {
     const IconComponent = MOVE_ICONS[move];
@@ -212,7 +222,7 @@ export default function GameInterface() {
         <CardHeader className="bg-primary/10 p-6">
           <div className="flex justify-between items-center">
             <CardTitle className="text-3xl font-bold text-primary">{getCardTitle()}</CardTitle>
-            <CoinDisplay amount={coins} />
+            <CoinDisplay amount={coins} onPurchaseClick={handlePurchaseCoins} />
           </div>
           { (gameState === 'choosing_move' || gameState === 'waiting_for_friend' || gameState === 'searching_for_random' || gameState === 'game_result') && placedBet > 0 &&
             <CardDescription className="text-md pt-2">Current Bet: {placedBet} coins</CardDescription>
