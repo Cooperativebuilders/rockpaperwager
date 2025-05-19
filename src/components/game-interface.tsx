@@ -307,7 +307,8 @@ export default function GameInterface() {
           {gameState === 'game_result' && (
             <Button
               onClick={handleRematch}
-              className="flex-1 text-lg p-6"
+              className="flex-1 text-lg"
+              size="lg"
               variant="default"
               disabled={isProcessing || coins < placedBet}
             >
@@ -316,7 +317,8 @@ export default function GameInterface() {
           )}
           <Button
             onClick={handleCancelAndReturnToInitial}
-            className="flex-1 text-lg p-6"
+            className="flex-1 text-lg"
+            size="lg"
             variant="outline"
             disabled={isProcessing && gameState !== 'choosing_move'}
           >
@@ -327,3 +329,4 @@ export default function GameInterface() {
     </Card>
   );
 }
+
