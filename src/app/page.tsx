@@ -1,3 +1,4 @@
+
 import GameInterface from '@/components/game-interface';
 
 export default function HomePage() {
@@ -8,7 +9,7 @@ export default function HomePage() {
           Rock Paper Wager
         </h1>
         <p className="mt-2 text-lg text-muted-foreground">
-          Test your luck and strategy. May the best hand win!
+          Create a lobby, invite friends, or join a random game. Wager your coins and prove your skill!
         </p>
       </header>
       <main className="w-full max-w-lg">
