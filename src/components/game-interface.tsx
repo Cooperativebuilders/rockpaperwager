@@ -10,7 +10,7 @@ import type { Move, Outcome } from '@/lib/game';
 import { MOVES, determineWinner, MOVE_EMOJIS } from '@/lib/game';
 import { cn } from '@/lib/utils';
 import { CoinDisplay } from '@/components/coin-display';
-import { TopUpDialog } from '@/components/top-up-dialog'; // Import the dialog
+import { TopUpDialog } from '@/components/top-up-dialog';
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 
 type GameState =
@@ -41,11 +41,10 @@ export default function GameInterface() {
   const [lobbyId, setLobbyId] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState('');
   const [opponentName, setOpponentName] = useState("Opponent");
-  const [isTopUpDialogOpen, setIsTopUpDialogOpen] = useState(false); // State for dialog
+  const [isTopUpDialogOpen, setIsTopUpDialogOpen] = useState(false);
 
   const { toast } = useToast();
 
-  // Simulate finding an opponent or game start
   useEffect(() => {
     let gameStartTimer: NodeJS.Timeout;
     if (gameState === 'waiting_for_friend' || gameState === 'searching_for_random') {
@@ -60,13 +59,11 @@ export default function GameInterface() {
         setGameState('choosing_move');
         setIsProcessing(false);
         setStatusMessage('');
-      }, 3000); // Simulate 3 second wait
+      }, 3000); 
     }
     return () => clearTimeout(gameStartTimer);
   }, [gameState, lobbyId, placedBet, toast, opponentName]);
 
-
-  // Game reveal logic
    useEffect(() => {
     let revealTimer: NodeJS.Timeout;
     if (gameState === 'revealing_moves' && playerMove) {
@@ -104,11 +101,10 @@ export default function GameInterface() {
         setGameState('game_result');
         setIsProcessing(false);
         setStatusMessage('');
-      }, 1500); // Reveal delay
+      }, 1500); 
     }
     return () => clearTimeout(revealTimer);
   }, [gameState, playerMove, placedBet, coins, toast, opponentName]);
-
 
   const resetCommonStates = () => {
     setPlayerMove(null);
@@ -132,7 +128,7 @@ export default function GameInterface() {
     setPlacedBet(amount);
     const newLobbyId = `LB${Math.random().toString(36).substring(2, 5).toUpperCase()}`;
     setLobbyId(newLobbyId);
-    setOpponentName("Friend"); // Set opponent name for lobby
+    setOpponentName("Friend");
     resetCommonStates();
     setGameState('waiting_for_friend');
   };
@@ -144,8 +140,8 @@ export default function GameInterface() {
       return;
     }
     setPlacedBet(amount);
-    setLobbyId(null); // Not a created lobby
-    setOpponentName("Random Player"); // Set opponent name for random game
+    setLobbyId(null); 
+    setOpponentName("Random Player");
     resetCommonStates();
     setGameState('searching_for_random');
   };
@@ -160,7 +156,7 @@ export default function GameInterface() {
     resetCommonStates();
     setPlacedBet(0);
     setLobbyId(null);
-    setOpponentName("Opponent"); // Reset opponent name
+    setOpponentName("Opponent");
     setGameState('initial');
   };
 
@@ -171,7 +167,6 @@ export default function GameInterface() {
       return;
     }
     resetCommonStates();
-    // OpponentName remains the same for a rematch
     setGameState('choosing_move');
   };
 
@@ -183,17 +178,14 @@ export default function GameInterface() {
     setIsTopUpDialogOpen(false);
   };
 
-  const handleConfirmCoinPurchase = () => {
-    const purchaseAmount = 500; // Simulated purchase amount
+  const handleConfirmCoinPurchase = (purchaseAmount: number) => {
     setCoins(prevCoins => prevCoins + purchaseAmount);
     toast({
       title: "Coins Added!",
-      description: `You've (simulated) purchased ${purchaseAmount} coins. Your balance is updated.`,
+      description: `You've (simulated) purchased ${purchaseAmount.toLocaleString()} coins. Your balance is updated.`,
       variant: 'default'
     });
-    // setIsTopUpDialogOpen(false); // Dialog closes itself via its onConfirmPurchase prop then onClose
   };
-
 
   const renderMoveButton = (move: Move) => {
     const IconComponent = MOVE_ICONS[move];
@@ -300,7 +292,6 @@ export default function GameInterface() {
             </Button>
           )}
 
-
           {gameState === 'choosing_move' && !isProcessing && (
             <div className="flex flex-col sm:flex-row gap-4 justify-around">
               {MOVES.map(renderMoveButton)}
@@ -394,5 +385,3 @@ export default function GameInterface() {
     </TooltipProvider>
   );
 }
-
-    
