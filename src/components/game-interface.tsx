@@ -4,7 +4,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { HandMetal, Hand, Scissors, Wallet, Users, UserPlus, DoorOpen, XCircle, Hourglass, Repeat, Send } from 'lucide-react';
+import { Wallet, Users, UserPlus, DoorOpen, XCircle, Hourglass, Repeat, Send } from 'lucide-react'; // Removed HandMetal, Hand, Scissors
 import { useToast } from '@/hooks/use-toast';
 import type { Move, Outcome } from '@/lib/game';
 import { MOVES, determineWinner, MOVE_EMOJIS } from '@/lib/game';
@@ -17,6 +17,43 @@ import { Input } from '@/components/ui/input';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import type { LobbyConfig } from '@/app/page';
 
+// Custom SVG Icon Components inspired by the logo
+const IconRock = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg viewBox="0 0 24 24" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    {/* Simplified fist shape */}
+    <rect x="5" y="10" width="14" height="10" rx="2" fill="#F5EFE0" stroke="#2A3B2C" />
+    {/* Knuckles/fingers part 1 */}
+    <path d="M7 10V8C7 6.89543 7.89543 6 9 6H11C12.1046 6 13 6.89543 13 8V10" fill="#F5EFE0" stroke="#2A3B2C" />
+    {/* Knuckles/fingers part 2 */}
+    <path d="M11 10V8C11 6.89543 11.8954 6 13 6H15C16.1046 6 17 6.89543 17 8V10" fill="#F5EFE0" stroke="#2A3B2C" />
+  </svg>
+);
+
+const IconPaper = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg viewBox="0 0 24 24" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    {/* Simplified open palm */}
+    <path d="M4 16.8V7.2C4 6.0799 4 5.51984 4.21799 5.09202C4.40973 4.71569 4.71569 4.40973 5.09202 4.21799C5.51984 4 6.0799 4 7.2 4H16.8C17.9201 4 18.4802 4 18.908 4.21799C19.2843 4.40973 19.5903 4.71569 19.782 5.09202C20 5.51984 20 6.0799 20 7.2V16.8C20 17.9201 20 18.4802 19.782 18.908C19.5903 19.2843 19.2843 19.5903 18.908 19.782C18.4802 20 17.9201 20 16.8 20H7.2C6.0799 20 5.51984 20 5.09202 19.782C4.71569 19.5903 4.40973 19.2843 4.21799 18.908C4 18.4802 4 17.9201 4 16.8Z" fill="#F5EFE0" stroke="#2A3B2C"/>
+    {/* Finger lines */}
+    <line x1="8" y1="8" x2="8" y2="16" stroke="#2A3B2C" />
+    <line x1="12" y1="6" x2="12" y2="16" stroke="#2A3B2C" />
+    <line x1="16" y1="8" x2="16" y2="16" stroke="#2A3B2C" />
+  </svg>
+);
+
+const IconScissors = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg viewBox="0 0 24 24" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    {/* Palm part of scissors hand */}
+    <path d="M7 21V13C7 11.3431 8.34315 10 10 10H14C15.6569 10 17 11.3431 17 13V21H7Z" fill="#F5EFE0" stroke="#2A3B2C" />
+    {/* Two fingers forming V */}
+    <path d="M10 10L6 3" fill="none" stroke="#2A3B2C" />
+    <path d="M14 10L18 3" fill="none" stroke="#2A3B2C" />
+    {/* Circles for finger joints (optional detail) */}
+    <circle cx="7.5" cy="13.5" r="1.5" fill="#F5EFE0" stroke="#2A3B2C" />
+    <circle cx="16.5" cy="13.5" r="1.5" fill="#F5EFE0" stroke="#2A3B2C" />
+  </svg>
+);
+
+
 type GameState =
   | 'initial'
   | 'selecting_bet_for_lobby'
@@ -27,9 +64,9 @@ type GameState =
   | 'game_result';
 
 const MOVE_ICONS: Record<Move, React.ElementType> = {
-  rock: HandMetal,
-  paper: Hand,
-  scissors: Scissors,
+  rock: IconRock,
+  paper: IconPaper,
+  scissors: IconScissors,
 };
 
 const BET_AMOUNTS = [10, 100, 1000];
@@ -39,7 +76,7 @@ interface GameInterfaceProps {
   initialLobbyConfig?: LobbyConfig | null;
   onLobbyInitialized?: () => void;
   onCoinsChange?: (newCoinAmount: number) => void;
-  onActiveGameChange?: (isActive: boolean) => void; // New prop
+  onActiveGameChange?: (isActive: boolean) => void; 
 }
 
 export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, onCoinsChange, onActiveGameChange }: GameInterfaceProps) {
@@ -531,3 +568,4 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
     </TooltipProvider>
   );
 }
+
