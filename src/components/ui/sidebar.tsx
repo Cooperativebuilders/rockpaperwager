@@ -250,6 +250,10 @@ const Sidebar = React.forwardRef<
             data-sidebar="sidebar"
             className="flex h-full w-full flex-col bg-sidebar group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border group-data-[variant=floating]:shadow"
           >
+            <div className="flex items-center justify-center p-4">
+              <img src="/logo.png" alt="Rock Paper Wager Logo" className="h-10" />
+            </div>
+            <SidebarSeparator />
             {children}
           </div>
         </div>

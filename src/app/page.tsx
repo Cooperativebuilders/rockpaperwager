@@ -5,6 +5,7 @@ import { useState } from 'react';
 import GameInterface from '@/components/game-interface';
 import FriendManagement from '@/components/friend-management';
 import { BetSelectionDialog } from '@/components/bet-selection-dialog';
+import Image from 'next/image'; // Import next/image
 
 export interface LobbyConfig {
   friendName: string;
@@ -17,7 +18,7 @@ export default function HomePage() {
   const [friendToInvite, setFriendToInvite] = useState<string | null>(null);
   const [lobbyConfigForGame, setLobbyConfigForGame] = useState<LobbyConfig | null>(null);
   const [currentPlayerCoins, setCurrentPlayerCoins] = useState(1000); // Initial default
-  const [isGameActive, setIsGameActive] = useState(false); // New state
+  const [isGameActive, setIsGameActive] = useState(false);
 
   const handleOpenBetDialog = (friendName: string) => {
     setFriendToInvite(friendName);
@@ -51,20 +52,26 @@ export default function HomePage() {
 
   return (
     <div className="flex flex-col items-center min-h-screen bg-background text-foreground p-4 sm:p-8">
-      <header className="w-full max-w-2xl mb-8 text-center">
-        <h1 className="text-5xl sm:text-6xl font-extrabold text-foreground tracking-tight">
-          Rock Paper Wager
-        </h1>
-        <p className="mt-2 text-lg text-muted-foreground">
-          Challenge your friends, create lobbies, or join random games. Wager your coins and prove your skill!
-        </p>
+      <header className="w-full max-w-md mb-8 text-center flex flex-col items-center">
+        {/* Add the logo here. Assumes logo.png is in public folder */}
+        <div className="w-full max-w-xs sm:max-w-sm md:max-w-md">
+          <Image
+            src="/logo.png"
+            alt="Rock Paper Wager Logo"
+            width={400} // Adjust width as needed, maintaining aspect ratio
+            height={585} // Adjust height based on original aspect ratio (e.g. if original is 400x585)
+            priority // Load the logo quickly
+            className="object-contain"
+          />
+        </div>
+        {/* Removed H1 and P tags as the logo contains the app name and conveys branding */}
       </header>
       <main className="w-full max-w-lg space-y-8">
         <GameInterface
           initialLobbyConfig={lobbyConfigForGame}
           onLobbyInitialized={handleLobbyInitialized}
           onCoinsChange={setCurrentPlayerCoins}
-          onActiveGameChange={setIsGameActive} // Pass the callback
+          onActiveGameChange={setIsGameActive}
         />
         {!isGameActive && <FriendManagement onInviteFriend={handleOpenBetDialog} />}
       </main>

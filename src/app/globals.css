@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -8,94 +9,94 @@ body {
 
 @layer base {
   :root {
-    --background: 215 28% 17%; /* Dark Navy Blue */
-    --foreground: 35 50% 90%; /* Creamy Off-White */
+    --background: 45 50% 90%; /* Light Beige/Cream */
+    --foreground: 120 25% 15%; /* Dark Green-Black for text */
 
-    --card: 215 28% 22%; /* Slightly lighter navy for cards */
-    --card-foreground: 35 50% 90%;
+    --card: 120 30% 25%; /* Dark Green (like logo circle) */
+    --card-foreground: 45 50% 90%; /* Light Beige/Cream (for text on cards) */
 
-    --popover: 215 28% 22%;
-    --popover-foreground: 35 50% 90%;
+    --popover: 120 30% 25%; /* Dark Green */
+    --popover-foreground: 45 50% 90%; /* Light Beige/Cream */
+    
+    --primary: 120 30% 25%; /* Dark Green (for primary elements) */
+    --primary-foreground: 45 50% 90%; /* Light Beige/Cream (text on primary) */
 
-    --primary: 20 75% 55%; /* Burnt Orange */
-    --primary-foreground: 35 50% 90%; /* Creamy Off-White for text on primary */
+    --secondary: 120 25% 35%; /* Slightly lighter green */
+    --secondary-foreground: 45 50% 90%; /* Light Beige/Cream */
 
-    --secondary: 215 28% 25%; /* A bit lighter navy for secondary elements */
-    --secondary-foreground: 35 50% 80%; /* Slightly darker cream */
+    --muted: 120 25% 45%; /* Muted Green */
+    --muted-foreground: 120 20% 75%; /* Lighter muted green text */
 
-    --muted: 215 28% 30%; /* Muted navy */
-    --muted-foreground: 215 20% 65%; /* Muted gray-blue text */
-
-    --accent: 20 75% 55%; /* Burnt Orange */
-    --accent-foreground: 35 50% 90%; /* Creamy Off-White for text on accent */
+    --accent: 40 80% 50%; /* Golden Yellow (coin, "WAGER" text) */
+    --accent-foreground: 120 25% 15%; /* Dark Green-Black (text on accent) */
 
     --destructive: 0 60% 50%; /* Standard Red */
-    --destructive-foreground: 35 50% 90%;
+    --destructive-foreground: 45 50% 90%; /* Light Beige/Cream */
 
-    --border: 215 28% 28%; /* Subtle border color */
-    --input: 215 28% 25%; /* Input background */
-    --ring: 20 75% 65%; /* Lighter Burnt Orange for focus rings */
+    --border: 120 25% 20%; /* Darker Green Border */
+    --input: 120 25% 30%; /* Input background - slightly lighter green */
+    --ring: 40 80% 60%; /* Lighter Golden Yellow for focus rings */
 
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
+    --chart-1: 40 80% 55%;
+    --chart-2: 120 30% 40%;
+    --chart-3: 120 25% 20%;
+    --chart-4: 45 40% 70%;
+    --chart-5: 30 70% 60%;
     --radius: 0.5rem;
 
-    --sidebar-background: 215 28% 15%;
-    --sidebar-foreground: 35 50% 90%;
-    --sidebar-primary: 20 75% 55%;
-    --sidebar-primary-foreground: 35 50% 90%;
-    --sidebar-accent: 215 28% 25%;
-    --sidebar-accent-foreground: 35 50% 90%;
-    --sidebar-border: 215 28% 28%;
-    --sidebar-ring: 20 75% 65%;
+    --sidebar-background: 120 30% 20%; /* Dark Green (slightly darker) */
+    --sidebar-foreground: 45 50% 90%; /* Light Beige/Cream */
+    --sidebar-primary: 40 80% 50%; /* Golden Yellow (active items) */
+    --sidebar-primary-foreground: 120 25% 15%; /* Dark Green-Black */
+    --sidebar-accent: 120 25% 30%; /* Mid Green (hover) */
+    --sidebar-accent-foreground: 45 50% 90%; /* Light Beige/Cream */
+    --sidebar-border: 120 25% 25%; /* Dark Green Border */
+    --sidebar-ring: 40 80% 60%; /* Lighter Golden Yellow */
   }
 
   .dark {
-    --background: 215 28% 17%; /* Dark Navy Blue */
-    --foreground: 35 50% 90%; /* Creamy Off-White */
+    --background: 45 50% 90%; /* Light Beige/Cream */
+    --foreground: 120 25% 15%; /* Dark Green-Black for text */
 
-    --card: 215 28% 22%; /* Slightly lighter navy for cards */
-    --card-foreground: 35 50% 90%;
+    --card: 120 30% 25%; /* Dark Green (like logo circle) */
+    --card-foreground: 45 50% 90%; /* Light Beige/Cream (for text on cards) */
 
-    --popover: 215 28% 22%;
-    --popover-foreground: 35 50% 90%;
+    --popover: 120 30% 25%; /* Dark Green */
+    --popover-foreground: 45 50% 90%; /* Light Beige/Cream */
+    
+    --primary: 120 30% 25%; /* Dark Green (for primary elements) */
+    --primary-foreground: 45 50% 90%; /* Light Beige/Cream (text on primary) */
 
-    --primary: 20 75% 55%; /* Burnt Orange */
-    --primary-foreground: 35 50% 90%; /* Creamy Off-White for text on primary */
+    --secondary: 120 25% 35%; /* Slightly lighter green */
+    --secondary-foreground: 45 50% 90%; /* Light Beige/Cream */
 
-    --secondary: 215 28% 25%; /* A bit lighter navy for secondary elements */
-    --secondary-foreground: 35 50% 80%; /* Slightly darker cream */
+    --muted: 120 25% 45%; /* Muted Green */
+    --muted-foreground: 120 20% 75%; /* Lighter muted green text */
 
-    --muted: 215 28% 30%; /* Muted navy */
-    --muted-foreground: 215 20% 65%; /* Muted gray-blue text */
-
-    --accent: 20 75% 55%; /* Burnt Orange */
-    --accent-foreground: 35 50% 90%; /* Creamy Off-White for text on accent */
+    --accent: 40 80% 50%; /* Golden Yellow (coin, "WAGER" text) */
+    --accent-foreground: 120 25% 15%; /* Dark Green-Black (text on accent) */
 
     --destructive: 0 60% 50%; /* Standard Red */
-    --destructive-foreground: 35 50% 90%;
+    --destructive-foreground: 45 50% 90%; /* Light Beige/Cream */
 
-    --border: 215 28% 28%; /* Subtle border color */
-    --input: 215 28% 25%; /* Input background */
-    --ring: 20 75% 65%; /* Lighter Burnt Orange for focus rings */
+    --border: 120 25% 20%; /* Darker Green Border */
+    --input: 120 25% 30%; /* Input background - slightly lighter green */
+    --ring: 40 80% 60%; /* Lighter Golden Yellow for focus rings */
 
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+    --chart-1: 40 80% 55%;
+    --chart-2: 120 30% 40%;
+    --chart-3: 120 25% 20%;
+    --chart-4: 45 40% 70%;
+    --chart-5: 30 70% 60%;
 
-    --sidebar-background: 215 28% 15%;
-    --sidebar-foreground: 35 50% 90%;
-    --sidebar-primary: 20 75% 55%;
-    --sidebar-primary-foreground: 35 50% 90%;
-    --sidebar-accent: 215 28% 25%;
-    --sidebar-accent-foreground: 35 50% 90%;
-    --sidebar-border: 215 28% 28%;
-    --sidebar-ring: 20 75% 65%;
+    --sidebar-background: 120 30% 20%; /* Dark Green (slightly darker) */
+    --sidebar-foreground: 45 50% 90%; /* Light Beige/Cream */
+    --sidebar-primary: 40 80% 50%; /* Golden Yellow (active items) */
+    --sidebar-primary-foreground: 120 25% 15%; /* Dark Green-Black */
+    --sidebar-accent: 120 25% 30%; /* Mid Green (hover) */
+    --sidebar-accent-foreground: 45 50% 90%; /* Light Beige/Cream */
+    --sidebar-border: 120 25% 25%; /* Dark Green Border */
+    --sidebar-ring: 40 80% 60%; /* Lighter Golden Yellow */
   }
 }
 
