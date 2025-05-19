@@ -25,7 +25,6 @@ export default function HomePage() {
   // Let's assume for the dialog check, we primarily rely on GameInterface's internal coin check
   // before it attempts to join/create. The dialog can show disabled buttons as a UI hint.
   // We'll pass a 'dummy' or a more complex prop later if needed.
-  // For now, let's retrieve it from GameInterface if possible, or simplify.
   // For this iteration, we'll add a coin prop to GameInterface to expose it.
   const [currentPlayerCoins, setCurrentPlayerCoins] = useState(1000); // Initial default
 
