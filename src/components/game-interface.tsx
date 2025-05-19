@@ -3,7 +3,6 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { HandMetal, Hand, Scissors, Dices, Wallet } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -20,9 +19,10 @@ const MOVE_ICONS: Record<Move, React.ElementType> = {
   scissors: Scissors,
 };
 
+const BET_AMOUNTS = [10, 100, 1000];
+
 export default function GameInterface() {
   const [coins, setCoins] = useState(1000);
-  const [betAmount, setBetAmount] = useState('');
   const [placedBet, setPlacedBet] = useState(0);
   const [playerMove, setPlayerMove] = useState<Move | null>(null);
   const [opponentMove, setOpponentMove] = useState<Move | null>(null);
@@ -71,17 +71,14 @@ export default function GameInterface() {
   }, [gameState, playerMove, placedBet, coins, toast]);
 
 
-  const handlePlaceBet = () => {
-    const bet = parseInt(betAmount);
-    if (isNaN(bet) || bet <= 0) {
-      toast({ title: 'Invalid Bet', description: 'Please enter a positive number for your bet.', variant: 'destructive' });
-      return;
-    }
-    if (bet > coins) {
+  const handleSelectBet = (amount: number) => {
+    if (isProcessing) return; // Prevent action if already processing
+
+    if (amount > coins) {
       toast({ title: 'Insufficient Coins', description: 'You do not have enough coins for this bet.', variant: 'destructive' });
       return;
     }
-    setPlacedBet(bet);
+    setPlacedBet(amount);
     setGameState('choosing');
     setPlayerMove(null);
     setOpponentMove(null);
@@ -95,7 +92,6 @@ export default function GameInterface() {
 
   const handlePlayAgain = () => {
     setGameState('betting');
-    setBetAmount('');
     setPlayerMove(null);
     setOpponentMove(null);
     setResultText('');
@@ -136,22 +132,18 @@ export default function GameInterface() {
 
       <CardContent className="p-6 space-y-6">
         {gameState === 'betting' && (
-          <div className="space-y-4">
-            <Input
-              type="number"
-              placeholder="Enter bet amount"
-              value={betAmount}
-              onChange={(e) => setBetAmount(e.target.value)}
-              className="text-lg p-3"
-              aria-label="Bet amount"
-            />
-            <Button
-              onClick={handlePlaceBet}
-              className="w-full text-lg p-6 bg-accent hover:bg-accent/90 text-accent-foreground"
-              disabled={isProcessing}
-            >
-              <Wallet className="mr-2 h-5 w-5" /> Place Bet & Choose
-            </Button>
+          <div className="space-y-3 sm:space-y-0 flex flex-col sm:flex-row sm:gap-3">
+            {BET_AMOUNTS.map((amount) => (
+              <Button
+                key={amount}
+                onClick={() => handleSelectBet(amount)}
+                className="flex-1 text-lg p-6 bg-accent hover:bg-accent/90 text-accent-foreground"
+                disabled={isProcessing}
+                aria-label={`Bet ${amount} coins`}
+              >
+                <Wallet className="mr-2 h-5 w-5" /> Bet {amount}
+              </Button>
+            ))}
           </div>
         )}
 
@@ -202,3 +194,4 @@ export default function GameInterface() {
     </Card>
   );
 }
+
