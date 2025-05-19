@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { HandMetal, Hand, Scissors, Dices, Wallet } from 'lucide-react'; // Changed HandRock to HandMetal, HandScissors to Scissors
+import { HandMetal, Hand, Scissors, Dices, Wallet } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import type { Move, Outcome } from '@/lib/game';
 import { MOVES, determineWinner, MOVE_EMOJIS } from '@/lib/game';
@@ -17,7 +17,7 @@ type GameState = 'betting' | 'choosing' | 'revealing' | 'result';
 const MOVE_ICONS: Record<Move, React.ElementType> = {
   rock: HandMetal,
   paper: Hand,
-  scissors: Scissors, // Changed from HandScissors
+  scissors: Scissors,
 };
 
 export default function GameInterface() {
@@ -109,7 +109,7 @@ export default function GameInterface() {
         key={move}
         variant="outline"
         size="lg"
-        className="flex-1 transform transition-transform hover:scale-105 focus:scale-105_shadow-lg_rounded-xl_p-6"
+        className="flex-1 transform transition-transform hover:scale-105 focus:scale-105 shadow-lg rounded-xl p-6"
         onClick={() => handleMakeMove(move)}
         disabled={isProcessing}
         aria-label={`Choose ${move}`}
