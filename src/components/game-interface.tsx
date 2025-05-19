@@ -10,6 +10,7 @@ import type { Move, Outcome } from '@/lib/game';
 import { MOVES, determineWinner, MOVE_EMOJIS } from '@/lib/game';
 import { cn } from '@/lib/utils';
 import { CoinDisplay } from '@/components/coin-display';
+import { TopUpDialog } from '@/components/top-up-dialog'; // Import the dialog
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 
 type GameState =
@@ -40,6 +41,7 @@ export default function GameInterface() {
   const [lobbyId, setLobbyId] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState('');
   const [opponentName, setOpponentName] = useState("Opponent");
+  const [isTopUpDialogOpen, setIsTopUpDialogOpen] = useState(false); // State for dialog
 
   const { toast } = useToast();
 
@@ -173,7 +175,15 @@ export default function GameInterface() {
     setGameState('choosing_move');
   };
 
-  const handlePurchaseCoins = () => {
+  const handleOpenTopUpDialog = () => {
+    setIsTopUpDialogOpen(true);
+  };
+
+  const handleCloseTopUpDialog = () => {
+    setIsTopUpDialogOpen(false);
+  };
+
+  const handleConfirmCoinPurchase = () => {
     const purchaseAmount = 500; // Simulated purchase amount
     setCoins(prevCoins => prevCoins + purchaseAmount);
     toast({
@@ -181,6 +191,7 @@ export default function GameInterface() {
       description: `You've (simulated) purchased ${purchaseAmount} coins. Your balance is updated.`,
       variant: 'default'
     });
+    // setIsTopUpDialogOpen(false); // Dialog closes itself via its onConfirmPurchase prop then onClose
   };
 
 
@@ -222,7 +233,7 @@ export default function GameInterface() {
         <CardHeader className="bg-primary/10 p-6">
           <div className="flex justify-between items-center">
             <CardTitle className="text-3xl font-bold text-primary">{getCardTitle()}</CardTitle>
-            <CoinDisplay amount={coins} onPurchaseClick={handlePurchaseCoins} />
+            <CoinDisplay amount={coins} onPurchaseClick={handleOpenTopUpDialog} />
           </div>
           { (gameState === 'choosing_move' || gameState === 'waiting_for_friend' || gameState === 'searching_for_random' || gameState === 'game_result') && placedBet > 0 &&
             <CardDescription className="text-md pt-2">Current Bet: {placedBet} coins</CardDescription>
@@ -375,6 +386,13 @@ export default function GameInterface() {
           </CardFooter>
         )}
       </Card>
+      <TopUpDialog
+        isOpen={isTopUpDialogOpen}
+        onClose={handleCloseTopUpDialog}
+        onConfirmPurchase={handleConfirmCoinPurchase}
+      />
     </TooltipProvider>
   );
 }
+
+    

@@ -19,15 +19,8 @@ interface TopUpDialogProps {
 }
 
 export function TopUpDialog({ isOpen, onClose, onConfirmPurchase }: TopUpDialogProps) {
-  // We don't need to render anything if not open, as AlertDialog handles its own visibility via the `open` prop.
-  // However, if AlertDialog didn't manage its own mounting/unmounting based on `open`,
-  // returning null here would be a common pattern:
-  // if (!isOpen) {
-  //   return null;
-  // }
-
   return (
-    <AlertDialog open={isOpen} onOpenChange={onClose}>
+    <AlertDialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Purchase More Coins?</AlertDialogTitle>
@@ -44,4 +37,10 @@ export function TopUpDialog({ isOpen, onClose, onConfirmPurchase }: TopUpDialogP
           }}>
             Confirm Purchase
           </AlertDialogAction>
-        </AlertDialogFooter
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
+
+    
