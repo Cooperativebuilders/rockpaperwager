@@ -72,7 +72,7 @@ export default function GameInterface() {
 
 
   const handleSelectBet = (amount: number) => {
-    if (isProcessing) return; // Prevent action if already processing
+    if (isProcessing) return; 
 
     if (amount > coins) {
       toast({ title: 'Insufficient Coins', description: 'You do not have enough coins for this bet.', variant: 'destructive' });
@@ -132,16 +132,17 @@ export default function GameInterface() {
 
       <CardContent className="p-6 space-y-6">
         {gameState === 'betting' && (
-          <div className="space-y-3 sm:space-y-0 flex flex-col sm:flex-row sm:gap-3">
+          <div className="space-y-4 sm:space-y-0 flex flex-col sm:flex-row sm:gap-4 items-center sm:justify-around">
             {BET_AMOUNTS.map((amount) => (
               <Button
                 key={amount}
                 onClick={() => handleSelectBet(amount)}
-                className="flex-1 text-lg p-6 bg-accent hover:bg-accent/90 text-accent-foreground"
-                disabled={isProcessing}
+                className="rounded-full w-28 h-28 flex flex-col items-center justify-center p-3 text-lg bg-accent hover:bg-accent/90 text-accent-foreground shadow-md transform transition-transform hover:scale-105"
+                disabled={isProcessing || amount > coins}
                 aria-label={`Bet ${amount} coins`}
               >
-                <Wallet className="mr-2 h-5 w-5" /> Bet {amount}
+                <Wallet className="mb-1 h-6 w-6" />
+                Bet {amount}
               </Button>
             ))}
           </div>
@@ -194,4 +195,3 @@ export default function GameInterface() {
     </Card>
   );
 }
-
