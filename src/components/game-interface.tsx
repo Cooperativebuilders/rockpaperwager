@@ -12,6 +12,8 @@ import { cn } from '@/lib/utils';
 import { CoinDisplay } from '@/components/coin-display';
 import { TopUpDialog } from '@/components/top-up-dialog';
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
 
 type GameState =
   | 'initial'
@@ -29,6 +31,7 @@ const MOVE_ICONS: Record<Move, React.ElementType> = {
 };
 
 const BET_AMOUNTS = [10, 100, 1000];
+const SIMULATED_FRIENDS_LIST = ['Alice (Simulated)', 'Bob (Simulated)', 'Charlie (Simulated)', 'Dave (Simulated)'];
 
 export default function GameInterface() {
   const [coins, setCoins] = useState(1000);
@@ -42,6 +45,7 @@ export default function GameInterface() {
   const [statusMessage, setStatusMessage] = useState('');
   const [opponentName, setOpponentName] = useState("Opponent");
   const [isTopUpDialogOpen, setIsTopUpDialogOpen] = useState(false);
+  const [selectedFriendForLobby, setSelectedFriendForLobby] = useState<string | null>(null);
 
   const { toast } = useToast();
 
@@ -50,8 +54,8 @@ export default function GameInterface() {
     if (gameState === 'waiting_for_friend' || gameState === 'searching_for_random') {
       setIsProcessing(true);
       let currentStatus = '';
-      if (gameState === 'waiting_for_friend') {
-        currentStatus = `Lobby ID: ${lobbyId}. Share this ID with a friend to invite them! Waiting for ${opponentName} to join...`;
+      if (gameState === 'waiting_for_friend' && lobbyId && opponentName) {
+        currentStatus = `Lobby ID: ${lobbyId}. Share this ID with ${opponentName} to invite them! Waiting for ${opponentName} to join...`;
       } else { // searching_for_random
         currentStatus = `Searching for ${opponentName} at ${placedBet} coins...`;
       }
@@ -115,24 +119,30 @@ export default function GameInterface() {
     setResultText('');
     setStatusMessage('');
     setIsProcessing(false);
+    // Keep selectedFriendForLobby unless explicitly cleared for a new lobby creation flow
   };
 
   const handleCreateLobbyIntent = () => {
     resetCommonStates();
+    setSelectedFriendForLobby(null); // Reset selected friend when starting a new lobby creation
     setGameState('selecting_bet_for_lobby');
   };
 
-  const handleSelectBetForLobby = (amount: number) => {
+  const handleFinalizeLobbyWithFriendAndBet = (amount: number) => {
     if (isProcessing) return;
+    if (!selectedFriendForLobby) {
+      toast({ title: 'Friend Not Selected', description: 'Please select a friend to invite to the lobby.', variant: 'destructive' });
+      return;
+    }
     if (amount > coins) {
       toast({ title: 'Insufficient Coins', description: 'You do not have enough coins to create a lobby with this bet.', variant: 'destructive' });
       return;
     }
     setPlacedBet(amount);
+    setOpponentName(selectedFriendForLobby);
     const newLobbyId = `LB${Math.random().toString(36).substring(2, 5).toUpperCase()}`;
     setLobbyId(newLobbyId);
-    setOpponentName("Friend");
-    resetCommonStates();
+    resetCommonStates(); // Reset moves, results, etc.
     setGameState('waiting_for_friend');
   };
 
@@ -160,6 +170,7 @@ export default function GameInterface() {
     setPlacedBet(0);
     setLobbyId(null);
     setOpponentName("Opponent");
+    setSelectedFriendForLobby(null);
     setGameState('initial');
   };
 
@@ -211,7 +222,7 @@ export default function GameInterface() {
   const getCardTitle = () => {
     switch (gameState) {
       case 'initial': return "Choose Your Path";
-      case 'selecting_bet_for_lobby': return "Select Bet for Lobby";
+      case 'selecting_bet_for_lobby': return "Create Lobby with Friend";
       case 'waiting_for_friend': return `Lobby with ${opponentName}`;
       case 'searching_for_random': return `Searching for ${opponentName}`;
       case 'choosing_move': return `Your Turn vs ${opponentName} (Bet: ${placedBet})`;
@@ -267,21 +278,37 @@ export default function GameInterface() {
           )}
 
           {gameState === 'selecting_bet_for_lobby' && !isProcessing && (
-            <div className="space-y-4">
-              <p className="text-center text-muted-foreground">Select the bet amount for your new lobby:</p>
-              <div className="flex flex-col sm:flex-row sm:gap-4 items-center sm:justify-around">
-                {BET_AMOUNTS.map((amount) => (
-                  <Button
-                    key={`create-bet-${amount}`}
-                    onClick={() => handleSelectBetForLobby(amount)}
-                    className="rounded-full w-28 h-28 flex flex-col items-center justify-center p-3 text-lg bg-accent hover:bg-accent/90 text-accent-foreground shadow-md transform transition-transform hover:scale-105"
-                    disabled={isProcessing || amount > coins}
-                    aria-label={`Create lobby with ${amount} coins bet`}
-                  >
-                    <UserPlus className="mb-1 h-6 w-6" />
-                    Bet {amount}
-                  </Button>
-                ))}
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="friend-select" className="text-md font-semibold text-muted-foreground">Invite a Friend:</Label>
+                <Select onValueChange={setSelectedFriendForLobby} value={selectedFriendForLobby || undefined}>
+                  <SelectTrigger id="friend-select" className="w-full">
+                    <SelectValue placeholder="Select a friend to invite" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {SIMULATED_FRIENDS_LIST.map(friend => (
+                      <SelectItem key={friend} value={friend}>{friend}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div>
+                <p className="text-center text-muted-foreground mb-3">Select Bet Amount:</p>
+                <div className="flex flex-col sm:flex-row sm:gap-4 items-center sm:justify-around">
+                  {BET_AMOUNTS.map((amount) => (
+                    <Button
+                      key={`create-bet-${amount}`}
+                      onClick={() => handleFinalizeLobbyWithFriendAndBet(amount)}
+                      className="rounded-full w-28 h-28 flex flex-col items-center justify-center p-3 text-lg bg-accent hover:bg-accent/90 text-accent-foreground shadow-md transform transition-transform hover:scale-105"
+                      disabled={isProcessing || amount > coins || !selectedFriendForLobby}
+                      aria-label={`Create lobby with ${selectedFriendForLobby || 'friend'} with ${amount} coins bet`}
+                    >
+                      <UserPlus className="mb-1 h-6 w-6" />
+                      Bet {amount}
+                    </Button>
+                  ))}
+                </div>
               </div>
               <Button onClick={handleCancelAndReturnToInitial} variant="outline" className="w-full mt-4">
                 <XCircle className="mr-2"/> Cancel
