@@ -49,17 +49,20 @@ export default function GameInterface() {
     let gameStartTimer: NodeJS.Timeout;
     if (gameState === 'waiting_for_friend' || gameState === 'searching_for_random') {
       setIsProcessing(true);
-      setStatusMessage(
-        gameState === 'waiting_for_friend' 
-          ? `Lobby ID: ${lobbyId}. Waiting for ${opponentName} to join...` 
-          : `Searching for ${opponentName} at ${placedBet} coins...`
-      );
+      let currentStatus = '';
+      if (gameState === 'waiting_for_friend') {
+        currentStatus = `Lobby ID: ${lobbyId}. Share this ID with a friend to invite them! Waiting for ${opponentName} to join...`;
+      } else { // searching_for_random
+        currentStatus = `Searching for ${opponentName} at ${placedBet} coins...`;
+      }
+      setStatusMessage(currentStatus);
+
       gameStartTimer = setTimeout(() => {
         toast({ title: `${opponentName} Found!`, description: "The game is about to begin.", variant: 'default' });
         setGameState('choosing_move');
         setIsProcessing(false);
         setStatusMessage('');
-      }, 3000); 
+      }, 3000);
     }
     return () => clearTimeout(gameStartTimer);
   }, [gameState, lobbyId, placedBet, toast, opponentName]);
@@ -101,7 +104,7 @@ export default function GameInterface() {
         setGameState('game_result');
         setIsProcessing(false);
         setStatusMessage('');
-      }, 1500); 
+      }, 1500);
     }
     return () => clearTimeout(revealTimer);
   }, [gameState, playerMove, placedBet, coins, toast, opponentName]);
@@ -140,7 +143,7 @@ export default function GameInterface() {
       return;
     }
     setPlacedBet(amount);
-    setLobbyId(null); 
+    setLobbyId(null);
     setOpponentName("Random Player");
     resetCommonStates();
     setGameState('searching_for_random');
@@ -285,7 +288,7 @@ export default function GameInterface() {
               </Button>
             </div>
           )}
-          
+
           {(gameState === 'waiting_for_friend' || gameState === 'searching_for_random') && isProcessing && (
              <Button onClick={handleCancelAndReturnToInitial} variant="outline" className="w-full mt-auto">
               <XCircle className="mr-2"/> Cancel Search/Lobby
