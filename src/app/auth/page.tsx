@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Mail, Lock, User, LogIn, UserPlus } from 'lucide-react'; // Removed Home icon
+import { Mail, Lock, User, LogIn, UserPlus } from 'lucide-react';
 import Image from 'next/image';
 import { Separator } from '@/components/ui/separator';
 
@@ -74,10 +74,9 @@ export default function AuthPage() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-background text-foreground p-4 sm:p-8">
       <Card className="w-full max-w-md shadow-xl rounded-xl bg-card text-card-foreground relative">
-        {/* "Back to Game" button removed from here */}
         
         <Tabs defaultValue="login" className="w-full">
-          <div className="px-4 pt-6 sm:px-6"> {/* Adjusted pt if Back to Game button was taking space */}
+          <div className="px-4 pt-6 sm:px-6">
             <TabsList className="grid w-full grid-cols-2 rounded-lg h-14">
               <TabsTrigger value="login" className="text-md data-[state=active]:bg-primary data-[state=active]:text-primary-foreground h-full rounded-l-lg">
                 <LogIn className="mr-2 h-5 w-5" /> Login
@@ -143,7 +142,7 @@ export default function AuthPage() {
                   OR
                 </span>
               </div>
-              <Button variant="outline" onClick={handleGoogleSignIn} className="w-full text-card-foreground hover:bg-muted hover:text-muted-foreground">
+              <Button variant="outline" onClick={handleGoogleSignIn} className="w-full text-foreground hover:bg-muted hover:text-muted-foreground">
                 <GoogleIcon />
                 Sign in with Google
               </Button>
@@ -223,7 +222,7 @@ export default function AuthPage() {
                   OR
                 </span>
               </div>
-              <Button variant="outline" onClick={handleGoogleSignIn} className="w-full text-card-foreground hover:bg-muted hover:text-muted-foreground">
+              <Button variant="outline" onClick={handleGoogleSignIn} className="w-full text-foreground hover:bg-muted hover:text-muted-foreground">
                  <GoogleIcon />
                 Sign in with Google
               </Button>
