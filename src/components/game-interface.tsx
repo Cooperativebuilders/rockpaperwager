@@ -16,6 +16,7 @@ import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/comp
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
+import { Slider } from '@/components/ui/slider'; // Added Slider import
 import type { LobbyConfig } from '@/app/page';
 
 // Custom SVG Icon Components inspired by the logo
@@ -70,7 +71,7 @@ const MOVE_ICONS: Record<Move, React.ElementType> = {
   scissors: IconScissors,
 };
 
-const BET_AMOUNTS = [10, 100, 1000];
+const FIXED_BET_AMOUNTS = [10, 100, 1000]; // For "Join Random Game" buttons
 const SIMULATED_FRIENDS_LIST = ['Alice (Simulated)', 'Bob (Simulated)', 'Charlie (Simulated)', 'Dave (Simulated)', 'Eve (Simulated)', 'Mallory (Simulated)'];
 
 interface GameInterfaceProps {
@@ -96,6 +97,7 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
   const [selectedFriendForLobby, setSelectedFriendForLobby] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [isSuggestionsPopoverOpen, setIsSuggestionsPopoverOpen] = useState(false);
+  const [lobbyBetAmount, setLobbyBetAmount] = useState(100); // State for lobby bet slider
 
   const { toast } = useToast();
 
@@ -114,19 +116,22 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
 
   useEffect(() => {
     if (initialLobbyConfig && !isProcessing) {
+      // Prevent re-initialization if lobby ID and state are already set by this config
       if (lobbyId === initialLobbyConfig.lobbyId && gameState === 'waiting_for_friend') return;
 
       setOpponentName(initialLobbyConfig.friendName);
       setPlacedBet(initialLobbyConfig.betAmount);
       setLobbyId(initialLobbyConfig.lobbyId);
       
+      // Reset game-specific states
       setPlayerMove(null);
       setOpponentMove(null);
       setResultText('');
       setStatusMessage('');
-      setIsProcessing(false);
-      setSelectedFriendForLobby(null);
-      setSearchTerm('');
+      setIsProcessing(false); // Ensure not stuck in processing
+      setSelectedFriendForLobby(null); // Clear any selections from direct lobby creation
+      setSearchTerm(''); // Clear search term
+      setLobbyBetAmount(100); // Reset lobby bet slider for next time
 
       setGameState('waiting_for_friend');
       
@@ -143,11 +148,11 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
       setIsProcessing(true);
       let currentStatus = '';
       if (gameState === 'waiting_for_friend' && lobbyId && opponentName) {
-        const displayOpponent = opponentName === "Opponent" ? "your friend" : opponentName;
+        const displayOpponent = opponentName === "Opponent" ? "your friend" : opponentName; // Should be opponentName
         currentStatus = `Lobby ID: ${lobbyId}. Share this ID with ${displayOpponent} to invite them! Waiting for ${displayOpponent} to join...`;
       } else if (gameState === 'searching_for_random' && opponentName !== "Opponent") {
          currentStatus = `Searching for ${opponentName} at ${placedBet} coins...`;
-      } else {
+      } else { // Default for searching_for_random if opponentName is still "Opponent"
         currentStatus = `Searching for a random player at ${placedBet} coins...`;
       }
       setStatusMessage(currentStatus);
@@ -216,10 +221,12 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
     resetCommonStates();
     setSelectedFriendForLobby(null); 
     setSearchTerm('');
-    setOpponentName("Friend");
+    setOpponentName("Friend"); // Default for lobby creation flow
+    setLobbyBetAmount(100); // Reset slider to default
     setGameState('selecting_bet_for_lobby');
   };
 
+  // Renamed from handleSelectBetForLobby, now takes the amount from slider
   const handleFinalizeLobbyWithFriendAndBet = (amount: number) => {
     if (isProcessing) return;
     if (!selectedFriendForLobby) {
@@ -232,7 +239,7 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
       return;
     }
     setPlacedBet(amount);
-    setOpponentName(selectedFriendForLobby);
+    setOpponentName(selectedFriendForLobby); // Use the selected friend
     const newLobbyId = `LB${Math.random().toString(36).substring(2, 5).toUpperCase()}`;
     setLobbyId(newLobbyId);
     resetCommonStates(); 
@@ -247,8 +254,8 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
       return;
     }
     setPlacedBet(amount);
-    setLobbyId(null);
-    setOpponentName("Random Player");
+    setLobbyId(null); // No lobby ID for random games
+    setOpponentName("Random Player"); // Set opponent name for random games
     resetCommonStates();
     setGameState('searching_for_random');
   };
@@ -263,10 +270,11 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
     resetCommonStates();
     setPlacedBet(0);
     setLobbyId(null);
-    setOpponentName("Opponent");
+    setOpponentName("Opponent"); // Generic opponent for initial state
     setSelectedFriendForLobby(null);
     setSearchTerm('');
     setIsSuggestionsPopoverOpen(false);
+    setLobbyBetAmount(100); // Reset slider
     setGameState('initial');
   };
 
@@ -278,7 +286,7 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
       return;
     }
     resetCommonStates();
-    setGameState('choosing_move');
+    setGameState('choosing_move'); // Go back to choosing move with same bet & opponent
   };
 
   const handleOpenTopUpDialog = () => {
@@ -301,7 +309,7 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
   const handleSearchTermChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newSearchTerm = e.target.value;
     setSearchTerm(newSearchTerm);
-    setSelectedFriendForLobby(null); 
+    setSelectedFriendForLobby(null); // Clear selected friend when typing
 
     if (newSearchTerm.trim() === '') {
       setIsSuggestionsPopoverOpen(false);
@@ -315,7 +323,7 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
 
   const handleSuggestionClick = (friendName: string) => {
     setSelectedFriendForLobby(friendName.replace(" (Simulated)", ""));
-    setSearchTerm(friendName); 
+    setSearchTerm(friendName); // Set input field to full friend name
     setIsSuggestionsPopoverOpen(false);
   };
 
@@ -418,7 +426,7 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
               </Button>
               <p className="text-center text-muted-foreground my-4">Or Join a Random Game:</p>
               <div className="flex flex-col sm:flex-row sm:gap-4 items-center sm:justify-around">
-                {BET_AMOUNTS.map((amount) => (
+                {FIXED_BET_AMOUNTS.map((amount) => (
                   <Button
                     key={`join-${amount}`}
                     onClick={() => handleJoinRandomGame(amount)}
@@ -460,14 +468,14 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
                   <PopoverContent 
                     className="w-[--radix-popover-trigger-width] p-0" 
                     align="start"
-                    onOpenAutoFocus={(e) => e.preventDefault()}
+                    onOpenAutoFocus={(e) => e.preventDefault()} // Prevents stealing focus from input
                   >
                     <div className="max-h-40 overflow-y-auto">
                     {filteredSuggestions.map((friend) => (
                       <div
                         key={friend}
                         className="px-3 py-2 text-sm cursor-pointer hover:bg-accent hover:text-accent-foreground"
-                        onMouseDown={() => handleSuggestionClick(friend)}
+                        onMouseDown={() => handleSuggestionClick(friend)} // use onMouseDown
                       >
                         {friend}
                       </div>
@@ -481,23 +489,34 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
                  {selectedFriendForLobby && <p className="text-sm text-green-600 dark:text-green-400">Selected: {selectedFriendForLobby}</p>}
               </div>
               
-              <div>
-                <p className="text-center text-muted-foreground mb-3">Select Bet Amount:</p>
-                <div className="flex flex-col sm:flex-row sm:gap-4 items-center sm:justify-around">
-                  {BET_AMOUNTS.map((amount) => (
-                    <Button
-                      key={`create-bet-${amount}`}
-                      onClick={() => handleFinalizeLobbyWithFriendAndBet(amount)}
-                      className="rounded-full w-28 h-28 flex flex-col items-center justify-center p-3 text-lg bg-accent hover:bg-accent/90 text-accent-foreground shadow-md transform transition-transform hover:scale-105 disabled:opacity-70 disabled:cursor-not-allowed"
-                      disabled={isProcessing || amount > coins || !selectedFriendForLobby}
-                      aria-label={`Create lobby with ${selectedFriendForLobby || 'friend'} with ${amount} coins bet`}
-                    >
-                      <UserPlus className="mb-1 h-6 w-6" />
-                      Bet {amount}
-                    </Button>
-                  ))}
-                </div>
+              <div className="space-y-2">
+                 <div className="flex justify-between items-center">
+                    <Label htmlFor="lobby-bet-slider" className="text-md font-semibold text-muted-foreground">
+                      Bet Amount:
+                    </Label>
+                    <span className="text-lg font-semibold text-primary">{lobbyBetAmount.toLocaleString()} Coins</span>
+                  </div>
+                  <Slider
+                    id="lobby-bet-slider"
+                    defaultValue={[lobbyBetAmount]}
+                    min={100}
+                    max={10000}
+                    step={100}
+                    onValueChange={(value) => setLobbyBetAmount(value[0])}
+                    disabled={!selectedFriendForLobby || isProcessing}
+                    aria-label="Lobby bet amount slider"
+                  />
               </div>
+              <Button
+                onClick={() => handleFinalizeLobbyWithFriendAndBet(lobbyBetAmount)}
+                disabled={isProcessing || !selectedFriendForLobby || lobbyBetAmount > coins}
+                className="w-full text-lg bg-accent hover:bg-accent/90 text-accent-foreground shadow-md transform transition-transform hover:scale-105 py-3"
+                aria-label={`Confirm bet and create lobby with ${selectedFriendForLobby || 'friend'} for ${lobbyBetAmount} coins`}
+              >
+                Confirm Bet & Create Lobby
+                {selectedFriendForLobby && ` with ${selectedFriendForLobby}`}
+              </Button>
+
               <Button onClick={handleCancelAndReturnToInitial} variant="outline" className="w-full mt-4">
                 <XCircle className="mr-2"/> Cancel
               </Button>
@@ -571,7 +590,7 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
                       variant="outline"
                       size="icon"
                       className="rounded-full w-16 h-16"
-                      disabled={isProcessing && gameState !== 'choosing_move'}
+                      disabled={isProcessing && gameState !== 'choosing_move'} // Allow cancel if choosing move
                       aria-label="Leave to Main Menu"
                     >
                       <DoorOpen className="w-8 h-8" />
@@ -586,8 +605,8 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
             { gameState === 'choosing_move' && !isProcessing &&
               <Button
                 onClick={handleCancelAndReturnToInitial}
-                className="flex-1 text-lg"
-                size="lg"
+                className="flex-1 text-lg" // Kept flex-1 to fill width if it's the only button
+                size="lg" // Standardized size
                 variant="outline"
               >
                 <DoorOpen className="mr-2"/> Leave Game
@@ -604,3 +623,5 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
     </TooltipProvider>
   );
 }
+
+    
