@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { Mail, Lock, User, LogIn, UserPlus, Home } from 'lucide-react';
 import Image from 'next/image';
-import { Separator } from '@/components/ui/separator'; // Added Separator import
+import { Separator } from '@/components/ui/separator';
 
 // A simple inline SVG for Google G icon
 const GoogleIcon = () => (
@@ -70,44 +70,45 @@ export default function AuthPage() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-background text-foreground p-4 sm:p-8">
-      <div className="absolute top-8 left-8">
-        <Button asChild variant="outline" className="text-foreground hover:bg-muted hover:text-muted-foreground">
-          <Link href="/">
-            <Home className="mr-2 h-5 w-5" />
-            Back to Game
-          </Link>
-        </Button>
-      </div>
-      
-      <div className="flex flex-col items-center mb-8">
-        <Image
-            src="/logo.png"
-            alt="Rock Paper Wager Logo"
-            width={728}
-            height={1000}
-            className="h-24 w-auto object-contain mb-4"
-            priority
-            data-ai-hint="company logo"
-        />
-        <h1 className="text-4xl font-bold text-primary">Rock Paper Wager</h1>
-        <p className="text-muted-foreground">Join the fun or log in to your account.</p>
-      </div>
-
-      <Card className="w-full max-w-md shadow-xl rounded-xl bg-card text-card-foreground">
+      <Card className="w-full max-w-md shadow-xl rounded-xl bg-card text-card-foreground relative">
+        <div className="absolute top-4 left-4 z-10">
+          <Button asChild variant="outline" size="sm" className="text-card-foreground hover:bg-muted hover:text-muted-foreground">
+            <Link href="/">
+              <Home className="mr-2 h-4 w-4" />
+              Back to Game
+            </Link>
+          </Button>
+        </div>
+        
         <Tabs defaultValue="login" className="w-full">
-          <CardHeader className="p-0">
-            <TabsList className="grid w-full grid-cols-2 rounded-t-xl rounded-b-none h-14">
-              <TabsTrigger value="login" className="text-md data-[state=active]:bg-primary data-[state=active]:text-primary-foreground h-full rounded-tl-xl">
+          {/* Container for TabsList to manage top padding */}
+          <div className="px-4 pt-16 sm:px-6"> {/* Use page padding for consistency */}
+            <TabsList className="grid w-full grid-cols-2 rounded-lg h-14">
+              <TabsTrigger value="login" className="text-md data-[state=active]:bg-primary data-[state=active]:text-primary-foreground h-full rounded-l-lg">
                 <LogIn className="mr-2 h-5 w-5" /> Login
               </TabsTrigger>
-              <TabsTrigger value="signup" className="text-md data-[state=active]:bg-primary data-[state=active]:text-primary-foreground h-full rounded-tr-xl">
+              <TabsTrigger value="signup" className="text-md data-[state=active]:bg-primary data-[state=active]:text-primary-foreground h-full rounded-r-lg">
                 <UserPlus className="mr-2 h-5 w-5" /> Sign Up
               </TabsTrigger>
             </TabsList>
-          </CardHeader>
+          </div>
+
+          {/* Logo Section - Below TabsList, above TabsContent */}
+          <div className="flex flex-col items-center px-6 py-6">
+            <Image
+                src="/logo.png"
+                alt="Rock Paper Wager Logo"
+                width={728}
+                height={1000}
+                className="h-24 w-auto object-contain"
+                priority
+                data-ai-hint="company logo"
+            />
+            {/* The h1 and p for "Rock Paper Wager" and tagline are removed as the logo likely includes this */}
+          </div>
           
           <TabsContent value="login">
-            <CardContent className="space-y-6 p-6">
+            <CardContent className="space-y-6 p-6 pt-0"> {/* pt-0 as logo provides spacing */}
               <form onSubmit={handleLogin} className="space-y-4">
                 <div>
                   <Label htmlFor="login-email" className="text-sm font-medium text-card-foreground">Email</Label>
@@ -156,7 +157,7 @@ export default function AuthPage() {
           </TabsContent>
 
           <TabsContent value="signup">
-            <CardContent className="space-y-6 p-6">
+            <CardContent className="space-y-6 p-6 pt-0"> {/* pt-0 as logo provides spacing */}
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div>
                   <Label htmlFor="signup-username" className="text-sm font-medium text-card-foreground">Username</Label>
@@ -244,6 +245,3 @@ export default function AuthPage() {
     </div>
   );
 }
-
-
-    
