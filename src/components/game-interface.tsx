@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
@@ -97,7 +96,9 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
   const [selectedFriendForLobby, setSelectedFriendForLobby] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [isSuggestionsPopoverOpen, setIsSuggestionsPopoverOpen] = useState(false);
-  const [lobbyBetAmount, setLobbyBetAmount] = useState(100); // State for lobby bet slider
+  const [lobbyBetAmount, setLobbyBetAmount] = useState(100);
+  const [customRandomBetAmount, setCustomRandomBetAmount] = useState(100);
+
 
   const { toast } = useToast();
 
@@ -116,22 +117,20 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
 
   useEffect(() => {
     if (initialLobbyConfig && !isProcessing) {
-      // Prevent re-initialization if lobby ID and state are already set by this config
       if (lobbyId === initialLobbyConfig.lobbyId && gameState === 'waiting_for_friend') return;
 
       setOpponentName(initialLobbyConfig.friendName);
       setPlacedBet(initialLobbyConfig.betAmount);
       setLobbyId(initialLobbyConfig.lobbyId);
 
-      // Reset game-specific states
       setPlayerMove(null);
       setOpponentMove(null);
       setResultText('');
       setStatusMessage('');
-      setIsProcessing(false); // Ensure not stuck in processing
-      setSelectedFriendForLobby(null); // Clear any selections from direct lobby creation
-      setSearchTerm(''); // Clear search term
-      setLobbyBetAmount(100); // Reset lobby bet slider for next time
+      setIsProcessing(false);
+      setSelectedFriendForLobby(null);
+      setSearchTerm('');
+      setLobbyBetAmount(100);
 
       setGameState('waiting_for_friend');
 
@@ -152,7 +151,7 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
         currentStatus = `Lobby ID: ${lobbyId}. Share this ID with ${displayOpponent} to invite them! Waiting for ${displayOpponent} to join...`;
       } else if (gameState === 'searching_for_random' && opponentName !== "Opponent") {
          currentStatus = `Searching for ${opponentName} at ${placedBet} coins...`;
-      } else { // Default for searching_for_random if opponentName is still "Opponent"
+      } else {
         currentStatus = `Searching for a random player at ${placedBet} coins...`;
       }
       setStatusMessage(currentStatus);
@@ -221,8 +220,8 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
     resetCommonStates();
     setSelectedFriendForLobby(null);
     setSearchTerm('');
-    setOpponentName("Friend"); // Default for lobby creation flow
-    setLobbyBetAmount(100); // Reset slider to default
+    setOpponentName("Friend");
+    setLobbyBetAmount(100);
     setGameState('selecting_bet_for_lobby');
   };
 
@@ -253,8 +252,8 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
       return;
     }
     setPlacedBet(amount);
-    setLobbyId(null); // No lobby ID for random games
-    setOpponentName("Random Player"); // Set opponent name for random games
+    setLobbyId(null);
+    setOpponentName("Random Player");
     resetCommonStates();
     setGameState('searching_for_random');
   };
@@ -269,11 +268,12 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
     resetCommonStates();
     setPlacedBet(0);
     setLobbyId(null);
-    setOpponentName("Opponent"); // Generic opponent for initial state
+    setOpponentName("Opponent");
     setSelectedFriendForLobby(null);
     setSearchTerm('');
     setIsSuggestionsPopoverOpen(false);
-    setLobbyBetAmount(100); // Reset slider
+    setLobbyBetAmount(100);
+    setCustomRandomBetAmount(100);
     setGameState('initial');
   };
 
@@ -285,7 +285,7 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
       return;
     }
     resetCommonStates();
-    setGameState('choosing_move'); // Go back to choosing move with same bet & opponent
+    setGameState('choosing_move');
   };
 
   const handleOpenTopUpDialog = () => {
@@ -308,7 +308,7 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
   const handleSearchTermChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newSearchTerm = e.target.value;
     setSearchTerm(newSearchTerm);
-    setSelectedFriendForLobby(null); // Clear selected friend when typing
+    setSelectedFriendForLobby(null);
 
     if (newSearchTerm.trim() === '') {
       setIsSuggestionsPopoverOpen(false);
@@ -322,7 +322,7 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
 
   const handleSuggestionClick = (friendName: string) => {
     setSelectedFriendForLobby(friendName.replace(" (Simulated)", ""));
-    setSearchTerm(friendName); // Set input field to full friend name
+    setSearchTerm(friendName);
     setIsSuggestionsPopoverOpen(false);
   };
 
@@ -421,7 +421,7 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
                 <Users className="mr-2" /> Create a Lobby (vs Friend)
               </Button>
               <p className="text-center text-muted-foreground my-4">Or Join a Random Game:</p>
-              <div className="flex flex-col sm:flex-row sm:gap-4 items-center sm:justify-around">
+              <div className="flex flex-col sm:flex-row sm:gap-4 items-center sm:justify-around mb-6">
                 {FIXED_BET_AMOUNTS.map((amount) => (
                   <Button
                     key={`join-${amount}`}
@@ -434,6 +434,33 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
                     Bet {amount}
                   </Button>
                 ))}
+              </div>
+               <div className="space-y-3 pt-4 border-t border-border">
+                 <div className="flex justify-between items-center">
+                    <Label htmlFor="custom-random-bet-slider" className="text-md font-semibold text-card-foreground">
+                      Or Join with a Custom Bet:
+                    </Label>
+                    <span className="text-lg font-semibold text-card-foreground">{customRandomBetAmount.toLocaleString()} Coins</span>
+                  </div>
+                  <Slider
+                    id="custom-random-bet-slider"
+                    value={[customRandomBetAmount]}
+                    min={10}
+                    max={Math.min(10000, coins)} // Cap max at user's coins or 10000
+                    step={10}
+                    onValueChange={(value) => setCustomRandomBetAmount(value[0])}
+                    disabled={isProcessing || coins < 10}
+                    aria-label="Custom random game bet amount slider"
+                    className="data-[disabled]:opacity-50"
+                  />
+                  <Button
+                    onClick={() => handleJoinRandomGame(customRandomBetAmount)}
+                    disabled={isProcessing || customRandomBetAmount > coins || coins < 10}
+                    className="w-full text-lg bg-secondary hover:bg-secondary/90 text-secondary-foreground shadow-md transform transition-transform hover:scale-105 py-3 mt-2"
+                    aria-label={`Join random game with ${customRandomBetAmount} coins bet`}
+                  >
+                    Join Random Game with {customRandomBetAmount} Coins
+                  </Button>
               </div>
             </div>
           )}
@@ -496,17 +523,17 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
                     id="lobby-bet-slider"
                     value={[lobbyBetAmount]}
                     min={100}
-                    max={10000}
+                    max={Math.min(10000, coins)} // Cap max at user's coins or 10000
                     step={100}
                     onValueChange={(value) => setLobbyBetAmount(value[0])}
-                    disabled={!selectedFriendForLobby || isProcessing}
+                    disabled={!selectedFriendForLobby || isProcessing || coins < 100}
                     aria-label="Lobby bet amount slider"
                     className="data-[disabled]:opacity-50"
                   />
               </div>
               <Button
                 onClick={() => handleFinalizeLobbyWithFriendAndBet(lobbyBetAmount)}
-                disabled={isProcessing || !selectedFriendForLobby || lobbyBetAmount > coins}
+                disabled={isProcessing || !selectedFriendForLobby || lobbyBetAmount > coins || coins < 100}
                 className="w-full text-lg bg-accent hover:bg-accent/90 text-accent-foreground shadow-md transform transition-transform hover:scale-105 py-3"
                 aria-label={`Confirm bet and create lobby with ${selectedFriendForLobby || 'friend'} for ${lobbyBetAmount} coins`}
               >
@@ -548,8 +575,8 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
                 <p className={cn(
                   "text-3xl font-bold py-2",
                   resultText.includes("won") && "text-green-400",
-                  resultText.includes("lost") && "text-red-500", // Adjusted for theme
-                  resultText.includes("draw") && "text-yellow-400" // Adjusted for theme
+                  resultText.includes("lost") && "text-red-500",
+                  resultText.includes("draw") && "text-yellow-400"
                 )}>
                   {resultText.substring(resultText.indexOf('- ') + 2)}
                 </p>
