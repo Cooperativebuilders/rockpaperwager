@@ -514,7 +514,7 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
                 {selectedFriendForLobby && ` with ${selectedFriendForLobby}`}
               </Button>
 
-              <Button onClick={handleCancelAndReturnToInitial} variant="outline" className="w-full mt-4 border-border text-card-foreground hover:bg-muted hover:text-muted-foreground">
+              <Button onClick={handleCancelAndReturnToInitial} variant="outline" className="w-full mt-4 border-border text-foreground hover:bg-muted hover:text-muted-foreground">
                 <XCircle className="mr-2"/> Cancel
               </Button>
             </div>
