@@ -71,9 +71,9 @@ const MOVE_ICONS: Record<Move, React.ElementType<CustomIconProps>> = {
 };
 
 const FIXED_BET_CONFIGS = [
-  { amount: 10, icon: IconRock, name: 'Bronze', bgColor: 'bg-[hsl(var(--bronze))]', hoverBgColor: 'hover:bg-[hsl(var(--bronze-hover))]', textColor: 'text-[hsl(var(--bronze-foreground))]', iconFill: 'hsl(var(--bronze-foreground))', iconStroke: 'hsl(var(--bronze-foreground))' },
-  { amount: 100, icon: IconPaper, name: 'Silver', bgColor: 'bg-[hsl(var(--silver))]', hoverBgColor: 'hover:bg-[hsl(var(--silver-hover))]', textColor: 'text-[hsl(var(--silver-foreground))]', iconFill: 'hsl(var(--silver-foreground))', iconStroke: 'hsl(var(--silver-foreground))' },
-  { amount: 1000, icon: IconScissors, name: 'Gold', bgColor: 'bg-[hsl(var(--gold))]', hoverBgColor: 'hover:bg-[hsl(var(--gold-hover))]', textColor: 'text-[hsl(var(--gold-foreground))]', iconFill: 'hsl(var(--gold-foreground))', iconStroke: 'hsl(var(--gold-foreground))' },
+  { amount: 10, name: 'Bronze', bgColor: 'bg-[hsl(var(--bronze))]', hoverBgColor: 'hover:bg-[hsl(var(--bronze-hover))]', textColor: 'text-[hsl(var(--bronze-foreground))]' },
+  { amount: 100, name: 'Silver', bgColor: 'bg-[hsl(var(--silver))]', hoverBgColor: 'hover:bg-[hsl(var(--silver-hover))]', textColor: 'text-[hsl(var(--silver-foreground))]' },
+  { amount: 1000, name: 'Gold', bgColor: 'bg-[hsl(var(--gold))]', hoverBgColor: 'hover:bg-[hsl(var(--gold-hover))]', textColor: 'text-[hsl(var(--gold-foreground))]' },
 ];
 
 const SIMULATED_FRIENDS_LIST = ['Alice (Simulated)', 'Bob (Simulated)', 'Charlie (Simulated)', 'Dave (Simulated)', 'Eve (Simulated)', 'Mallory (Simulated)'];
@@ -152,9 +152,9 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
       setIsProcessing(true);
       let currentStatus = '';
       if (gameState === 'waiting_for_friend' && lobbyId && opponentName) {
-        const displayOpponent = opponentName === "Opponent" ? "your friend" : opponentName;
+        const displayOpponent = opponentName === "Friend" ? "your friend" : opponentName;
         currentStatus = `Lobby ID: ${lobbyId}. Share this ID with ${displayOpponent} to invite them! Waiting for ${displayOpponent} to join...`;
-      } else if (gameState === 'searching_for_random' && opponentName !== "Opponent") {
+      } else if (gameState === 'searching_for_random' && opponentName !== "Random Player") {
          currentStatus = `Searching for ${opponentName} at ${placedBet} coins...`;
       } else {
         currentStatus = `Searching for a random player at ${placedBet} coins...`;
@@ -422,13 +422,12 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
               <p className="text-center text-muted-foreground my-4">Or Join a Random Game:</p>
               <div className="flex flex-col sm:flex-row sm:gap-4 items-center sm:justify-around mb-6">
                 {FIXED_BET_CONFIGS.map((config) => {
-                  const IconComponent = config.icon;
                   return (
                     <Button
                       key={`join-${config.amount}`}
                       onClick={() => handleJoinRandomGame(config.amount)}
                       className={cn(
-                        "rounded-lg w-28 h-32 flex flex-col items-center justify-center p-2 text-lg shadow-md transform transition-transform hover:scale-105 disabled:opacity-70 disabled:cursor-not-allowed",
+                        "rounded-full w-28 h-28 flex flex-col items-center justify-center p-2 text-lg shadow-md transform transition-transform hover:scale-105 disabled:opacity-70 disabled:cursor-not-allowed",
                         config.bgColor,
                         config.hoverBgColor,
                         config.textColor
@@ -436,8 +435,7 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
                       disabled={isProcessing || config.amount > coins}
                       aria-label={`Join random game with ${config.amount} coins bet (${config.name})`}
                     >
-                      <IconComponent className="w-12 h-12 mb-1" fillColor={config.iconFill} strokeColor={config.iconStroke} />
-                      <span className="text-xl font-bold">{config.amount}</span>
+                      <span className="text-2xl font-bold">{config.amount}</span>
                       <span className="text-xs font-medium">COINS</span>
                     </Button>
                   );
