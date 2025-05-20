@@ -48,7 +48,7 @@ export default function FriendManagement({ onInviteFriend }: FriendManagementPro
             value={newFriendName}
             onChange={(e) => setNewFriendName(e.target.value)}
             placeholder="Enter friend's name to add"
-            className="flex-grow"
+            className="flex-grow bg-input text-card-foreground placeholder:text-card-foreground/70"
             aria-label="New friend name"
           />
           <Button onClick={handleAddFriend} aria-label="Add friend" className="w-full sm:w-auto">
@@ -96,3 +96,5 @@ export default function FriendManagement({ onInviteFriend }: FriendManagementPro
     </Card>
   );
 }
+
+    
