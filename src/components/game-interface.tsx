@@ -4,7 +4,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Wallet, Users, UserPlus, DoorOpen, XCircle, Hourglass, Repeat, Send } from 'lucide-react';
+import { Wallet, Users, UserPlus, DoorOpen, XCircle, Hourglass, Repeat, Settings } from 'lucide-react'; // Added Settings
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'; // Added Avatar components
 import { useToast } from '@/hooks/use-toast';
 import type { Move, Outcome } from '@/lib/game';
 import { MOVES, determineWinner, MOVE_EMOJIS } from '@/lib/game';
@@ -360,9 +361,28 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
         <CardHeader className="bg-primary/10 p-6">
           <div className="flex justify-between items-center">
             <CardTitle className="text-3xl font-bold text-primary">{getCardTitle()}</CardTitle>
-            <div className="flex items-center gap-x-3">
-              <span className="text-sm text-foreground hidden sm:inline">Welcome, Player123!</span>
-              <CoinDisplay amount={coins} onPurchaseClick={handleOpenTopUpDialog} />
+            <div className="flex items-center gap-x-4">
+                <div className="flex items-center gap-x-2">
+                    <Avatar className="h-9 w-9">
+                        <AvatarImage src="https://placehold.co/64x64.png" alt="User Avatar" data-ai-hint="user avatar" />
+                        <AvatarFallback>P</AvatarFallback>
+                    </Avatar>
+                    <span className="text-md font-semibold text-foreground">
+                        Player123
+                    </span>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-9 w-9 text-foreground hover:bg-accent/20">
+                                <Settings className="h-5 w-5" />
+                                <span className="sr-only">Profile Settings</span>
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>Profile Settings (Not Implemented)</p>
+                        </TooltipContent>
+                    </Tooltip>
+                </div>
+                <CoinDisplay amount={coins} onPurchaseClick={handleOpenTopUpDialog} />
             </div>
           </div>
           { (gameState === 'choosing_move' || gameState === 'waiting_for_friend' || gameState === 'searching_for_random' || gameState === 'game_result') && placedBet > 0 &&
@@ -383,7 +403,7 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
               <Button 
                 onClick={handleCreateLobbyIntent} 
                 size="lg" 
-                className="w-full text-lg bg-accent hover:bg-accent/90 text-accent-foreground shadow-md transform transition-transform hover:scale-105 py-3" // Added py-3 for vertical padding
+                className="w-full text-lg bg-accent hover:bg-accent/90 text-accent-foreground shadow-md transform transition-transform hover:scale-105 py-3"
               >
                 <Users className="mr-2" /> Create a Lobby (vs Friend)
               </Button>
@@ -575,3 +595,4 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
     </TooltipProvider>
   );
 }
+
