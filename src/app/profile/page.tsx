@@ -5,45 +5,60 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import Link from 'next/link';
-import { ArrowLeft, LogOut, UserCircle, Home, CreditCard, Loader2 } from "lucide-react";
-import { useAuth, type UserProfile as AuthUserProfile } from '@/contexts/auth-context'; // Import useAuth
+import { ArrowLeft, LogOut, UserCircle, Home, CreditCard, Loader2, AlertTriangle } from "lucide-react";
+import { useAuth, type UserProfile as AuthUserProfile } from '@/contexts/auth-context';
 import { useEffect, useState } from "react";
 import { Separator } from "@/components/ui/separator";
 import { useRouter } from "next/navigation";
 
 
 export default function ProfilePage() {
-  const { user, userProfile, signOut, loading: authLoading, fetchUserProfile: fetchAuthUserProfile } = useAuth();
+  const { user, userProfile, signOut, loading: authLoading, error: authContextError, fetchUserProfile: fetchAuthUserProfile } = useAuth();
   const router = useRouter();
   const [profileData, setProfileData] = useState<AuthUserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [pageSpecificError, setPageSpecificError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
-      router.push('/auth'); // Redirect if not authenticated
+      router.push('/auth'); 
     }
   }, [user, authLoading, router]);
   
   useEffect(() => {
+    setPageSpecificError(null); // Clear page-specific error on dependency change
     if (userProfile) {
       setProfileData(userProfile);
       setIsLoading(false);
-    } else if (user && !userProfile && !authLoading) {
-      // If userProfile is null in context but user exists, try fetching it.
-      // This can happen on direct navigation to /profile if context hasn't fully populated.
-      const loadProfile = async () => {
-        setIsLoading(true);
-        const fetched = await fetchAuthUserProfile(user.uid);
-        if (fetched) {
-          setProfileData(fetched);
-        }
+    } else if (user && !authLoading) { 
+      // User is loaded, auth context isn't loading anymore
+      // If userProfile from context is null, try fetching, unless context already reported an error
+      if (authContextError) {
+        setPageSpecificError(authContextError);
         setIsLoading(false);
-      };
-      loadProfile();
+      } else {
+        const loadProfile = async () => {
+          setIsLoading(true);
+          try {
+            const fetched = await fetchAuthUserProfile(user.uid);
+            if (fetched) {
+              setProfileData(fetched);
+            } else {
+              setPageSpecificError("Profile data not found.");
+            }
+          } catch (err: any) {
+            console.error("Error fetching profile on page: ", err);
+            setPageSpecificError(err.message || "Failed to load profile data.");
+          } finally {
+            setIsLoading(false);
+          }
+        };
+        loadProfile();
+      }
     } else if (!user && !authLoading) {
-       setIsLoading(false); // Not logged in, nothing to load
+       setIsLoading(false); 
     }
-  }, [user, userProfile, authLoading, fetchAuthUserProfile]);
+  }, [user, userProfile, authLoading, authContextError, fetchAuthUserProfile]);
 
 
   if (authLoading || isLoading) {
@@ -55,8 +70,9 @@ export default function ProfilePage() {
     );
   }
 
-  if (!user || !profileData) {
-     // Should be redirected by useEffect, but as a fallback:
+  if (!user) {
+    // This case should ideally be handled by the redirect in the first useEffect,
+    // but as a fallback if the user object is cleared for some reason.
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-background text-foreground p-4 sm:p-8">
         <p>You need to be logged in to view this page.</p>
@@ -66,8 +82,53 @@ export default function ProfilePage() {
       </div>
     );
   }
+
+  if (pageSpecificError && !profileData) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-background text-foreground p-4 sm:p-8">
+        <Card className="w-full max-w-md p-6 shadow-xl rounded-xl bg-card text-card-foreground">
+          <div className="flex flex-col items-center text-center">
+            <AlertTriangle className="h-12 w-12 text-destructive mb-4" />
+            <CardTitle className="text-2xl text-destructive mb-2">Profile Error</CardTitle>
+            <CardDescription className="text-muted-foreground mb-4">
+              Could not load your profile information.
+            </CardDescription>
+            <p className="text-sm text-destructive-foreground bg-destructive/20 p-3 rounded-md mb-6">{pageSpecificError}</p>
+            <Button onClick={() => router.push('/')} className="w-full">
+              Go to Homepage
+            </Button>
+             <Button variant="outline" onClick={signOut} className="w-full mt-2 text-foreground hover:bg-muted hover:text-muted-foreground">
+              Logout and Try Again
+            </Button>
+          </div>
+        </Card>
+      </div>
+    );
+  }
   
-  // Simulated join date for display if not present
+  if (!profileData && !isLoading) {
+     // Fallback if profileData is still null after loading attempts without a specific error message caught
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-background text-foreground p-4 sm:p-8">
+        <p>Could not load profile data. Please try again later.</p>
+        <Button asChild className="mt-4">
+          <Link href="/">Go to Homepage</Link>
+        </Button>
+      </div>
+    );
+  }
+  
+  // Ensure profileData is not null before proceeding
+  if (!profileData) {
+    // This should ideally be caught by one of the conditions above, but acts as a final safety net
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-background text-foreground p-4 sm:p-8">
+         <Loader2 className="h-12 w-12 animate-spin text-primary" />
+         <p className="mt-4 text-muted-foreground">Preparing profile...</p>
+       </div>
+    );
+  }
+  
   const joinDate = profileData.createdAt?.toDate ? profileData.createdAt.toDate().toLocaleDateString() : "Not available";
 
 
@@ -86,9 +147,8 @@ export default function ProfilePage() {
           </div>
         </CardHeader>
         <CardContent className="space-y-8 pt-6">
-          {/* User Info and Edit Button Section */}
           <div className="flex items-start justify-between gap-4">
-            <div className="flex items-center space-x-4"> {/* Avatar and text details */}
+            <div className="flex items-center space-x-4"> 
               <Avatar className="h-16 w-16 border-2 border-accent">
                 <AvatarImage src={profileData.avatarUrl || `https://placehold.co/128x128.png?text=${profileData.username.charAt(0).toUpperCase()}`} alt={profileData.username} data-ai-hint="user avatar" />
                 <AvatarFallback className="bg-muted text-muted-foreground text-2xl">
@@ -110,7 +170,6 @@ export default function ProfilePage() {
 
           <Separator />
 
-          {/* Detailed User Information */}
           <div className="space-y-4">
             <h3 className="text-xl font-semibold text-card-foreground border-b border-border pb-2">Account Details</h3>
             <div className="space-y-3 text-sm">
@@ -188,7 +247,6 @@ export default function ProfilePage() {
              </div>
           </div>
           
-          {/* Grouped Buttons: Withdraw and Logout */}
           <div className="mt-6 space-y-2">
             <Button asChild className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground">
               <Link href="/profile/withdraw">Withdraw Coins</Link>
@@ -208,3 +266,5 @@ export default function ProfilePage() {
     </div>
   );
 }
+
+    
