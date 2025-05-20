@@ -22,6 +22,9 @@ export default function ProfilePage() {
     router.push('/auth');
   };
 
+  // Simulate username for AvatarFallback
+  const username = "Player123";
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-background text-foreground p-4 sm:p-8">
       <Card className="w-full max-w-lg shadow-xl rounded-xl bg-card text-card-foreground">
@@ -37,16 +40,26 @@ export default function ProfilePage() {
           </div>
         </CardHeader>
         <CardContent className="space-y-8 pt-6">
-          <div className="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-6">
-            <Avatar className="h-24 w-24 sm:h-32 sm:w-32 border-4 border-accent">
-              <AvatarImage src="https://placehold.co/128x128.png" alt="User Avatar" data-ai-hint="user avatar" />
-              <AvatarFallback className="bg-muted text-muted-foreground text-4xl">P</AvatarFallback>
-            </Avatar>
-            <div className="text-center sm:text-left">
-              <h2 className="text-2xl sm:text-3xl font-semibold text-card-foreground">Player123</h2>
-              <p className="text-md text-muted-foreground">player123@example.com (Simulated)</p>
-              <p className="text-sm text-muted-foreground">Joined: January 1, 2024 (Simulated)</p>
+          {/* User Info and Edit Button Section */}
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex items-center space-x-4"> {/* Avatar and text details */}
+              <Avatar className="h-20 w-20 border-2 border-accent">
+                <AvatarImage src="https://placehold.co/128x128.png" alt="User Avatar" data-ai-hint="user avatar" />
+                <AvatarFallback className="bg-muted text-muted-foreground text-3xl">
+                  {username.charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <h2 className="text-2xl font-semibold text-card-foreground">{username}</h2>
+                <p className="text-sm text-muted-foreground">player123@example.com (Simulated)</p>
+                <p className="text-xs text-muted-foreground">Joined: January 1, 2024 (Simulated)</p>
+              </div>
             </div>
+            <Button asChild variant="outline" size="sm" className="bg-background text-foreground hover:bg-muted hover:text-muted-foreground flex-shrink-0">
+              <Link href="/profile/edit">
+                Edit
+              </Link>
+            </Button>
           </div>
 
           <div className="space-y-4">
@@ -88,12 +101,10 @@ export default function ProfilePage() {
              </div>
           </div>
           
+          {/* Grouped Buttons: Withdraw and Logout */}
           <div className="mt-6 space-y-2">
             <Button asChild className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground">
               <Link href="/profile/withdraw">Withdraw Coins</Link>
-            </Button>
-            <Button asChild className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
-              <Link href="/profile/edit">Edit Profile</Link>
             </Button>
             <Button
               variant="destructive"
