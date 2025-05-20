@@ -5,7 +5,7 @@ import { useState } from 'react';
 import GameInterface from '@/components/game-interface';
 import FriendManagement from '@/components/friend-management';
 import { BetSelectionDialog } from '@/components/bet-selection-dialog';
-import Image from 'next/image'; 
+import Image from 'next/image';
 
 export interface LobbyConfig {
   friendName: string;
@@ -33,7 +33,8 @@ export default function HomePage() {
   const handleConfirmBetAndInvite = (betAmount: number) => {
     if (friendToInvite) {
       if (betAmount > currentPlayerCoins) {
-        alert("You don't have enough coins for this bet."); // TODO: Replace with toast
+        // TODO: Replace with toast for better UX
+        alert("You don't have enough coins for this bet.");
         return;
       }
       const newLobbyId = `LB${Math.random().toString(36).substring(2, 5).toUpperCase()}`;
@@ -53,13 +54,13 @@ export default function HomePage() {
   return (
     <div className="flex flex-col items-center min-h-screen bg-background text-foreground p-4 sm:p-8">
       <header className="w-full flex justify-center mb-8"> {/* Centering the logo container */}
-        <div className="bg-card p-4 rounded-xl shadow-xl max-w-xs"> {/* Logo container with green background, padding, rounding, shadow, and max-width */}
+        <div className="bg-card p-4 rounded-xl shadow-xl max-w-md"> {/* Logo container with green background, padding, rounding, shadow, and adjusted max-width */}
           <Image
-            src="/logo.png"
+            src="/logo.png" // Make sure public/logo.png exists
             alt="Rock Paper Wager Logo"
-            width={728} // Intrinsic width of your image file
-            height={1000} // Intrinsic height of your image file
-            priority
+            width={728} // Actual width of your logo.png
+            height={1000} // Actual height of your logo.png
+            priority // Good for LCP
             className="object-contain w-full h-auto" // Makes image responsive within its parent div
             data-ai-hint="company logo"
           />
@@ -72,6 +73,7 @@ export default function HomePage() {
           onCoinsChange={setCurrentPlayerCoins}
           onActiveGameChange={setIsGameActive}
         />
+        {/* FriendManagement is only shown when a game is not active and not in lobby setup */}
         {!isGameActive && <FriendManagement onInviteFriend={handleOpenBetDialog} />}
       </main>
       <footer className="mt-12 text-center text-sm text-muted-foreground">
