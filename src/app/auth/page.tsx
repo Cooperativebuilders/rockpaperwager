@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Mail, Lock, User, LogIn, UserPlus, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { Separator } from '@/components/ui/separator';
-import { useAuth } from '@/contexts/auth-context'; // Import useAuth
+import { useAuth } from '@/contexts/auth-context';
 
 // A simple inline SVG for Google G icon
 const GoogleIcon = () => (
@@ -25,7 +25,7 @@ const GoogleIcon = () => (
 );
 
 export default function AuthPage() {
-  const { signUp, signIn, signInWithGoogle, loading, error } = useAuth(); // Use auth context
+  const { signUp, signIn, signInWithGoogle, loading, error } = useAuth();
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [signupUsername, setSignupUsername] = useState('');
@@ -41,9 +41,7 @@ export default function AuthPage() {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (signupPassword !== signupConfirmPassword) {
-      // This validation should ideally be handled by the useAuth hook or show a local error.
-      // For simplicity, let's keep the toast logic in useAuth for Firebase errors.
-      alert("Passwords do not match."); // Simple alert for now
+      alert("Passwords do not match.");
       return;
     }
     await signUp(signupUsername, signupEmail, signupPassword);
@@ -52,6 +50,17 @@ export default function AuthPage() {
   const handleGoogleSignIn = async () => {
     await signInWithGoogle();
   };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-background text-foreground p-4 sm:p-8">
+        <Card className="w-full max-w-md shadow-xl rounded-xl bg-card text-card-foreground relative flex items-center justify-center min-h-[500px]">
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
+          <p className="mt-4 ml-4 text-muted-foreground">Initializing...</p>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-background text-foreground p-4 sm:p-8">
@@ -127,9 +136,12 @@ export default function AuthPage() {
                 </span>
               </div>
               <Button variant="outline" onClick={handleGoogleSignIn} className="w-full text-foreground hover:bg-muted hover:text-muted-foreground" disabled={loading}>
-                {loading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <GoogleIcon />}
+                
+                {loading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : 
+                <GoogleIcon />}
                 Sign in with Google
               </Button>
+              
             </CardContent>
           </TabsContent>
 
@@ -211,9 +223,12 @@ export default function AuthPage() {
                 </span>
               </div>
               <Button variant="outline" onClick={handleGoogleSignIn} className="w-full text-foreground hover:bg-muted hover:text-muted-foreground" disabled={loading}>
-                 {loading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <GoogleIcon />}
+                 
+                 {loading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : 
+                 <GoogleIcon />}
                 Sign in with Google
               </Button>
+              
             </CardContent>
           </TabsContent>
         </Tabs>

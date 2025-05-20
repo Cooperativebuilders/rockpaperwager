@@ -5,6 +5,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from '@/contexts/auth-context'; // Import AuthProvider
 
+import { app, auth, db } from '../lib/firebase';
 const geistSans = Geist({
   variable: '--font-geist-sans',
   subsets: ['latin'],
