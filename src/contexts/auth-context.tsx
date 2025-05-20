@@ -20,7 +20,7 @@ export interface UserProfile {
   bic?: string;
   avatarUrl?: string;
   coins: number;
-  createdAt: Timestamp | Date; 
+  createdAt: Timestamp | Date;
   lastLogin?: Timestamp | Date;
 }
 
@@ -49,48 +49,44 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const router = useRouter();
 
   const fetchUserProfileCallback = useCallback(async (uid: string): Promise<UserProfile | null> => {
-    setError(null); 
+    setLoading(true); // Ensure loading is true at the start of fetch
+    setError(null);
+    console.log(`Fetching profile for UID: ${uid}`);
     try {
       const userDocRef = doc(db, 'users', uid);
       const userDocSnap = await getDoc(userDocRef);
       if (userDocSnap.exists()) {
+        console.log(`Profile found for UID: ${uid}`, userDocSnap.data());
         const profileData = userDocSnap.data() as UserProfile;
-        // Convert Firestore Timestamps to JS Date objects for client-side consistency if needed
-        // This can prevent issues if other parts of the app expect Date objects
         const processedProfileData = {
           ...profileData,
           createdAt: profileData.createdAt instanceof Timestamp ? profileData.createdAt.toDate() : profileData.createdAt,
           lastLogin: profileData.lastLogin && profileData.lastLogin instanceof Timestamp ? profileData.lastLogin.toDate() : profileData.lastLogin,
         };
         setUserProfile(processedProfileData);
+        setLoading(false);
         return processedProfileData;
       } else {
         console.warn(`No user profile document found for UID: ${uid}`);
         setUserProfile(null);
         setError("User profile not found. Please complete sign up if this is a new account.");
+        setLoading(false);
         return null;
       }
     } catch (err: any) {
       console.error("Error fetching user profile: ", err);
       setError(`Failed to fetch profile: ${err.message || 'Unknown error'}`);
       setUserProfile(null);
+      setLoading(false);
       return null;
     }
-  }, []); 
+  }, []);
 
   const updateFirestoreProfileCallback = useCallback(async (uid: string, data: Partial<UserProfile>) => {
     setError(null);
     try {
       const userDocRef = doc(db, 'users', uid);
-      // Ensure date fields are serverTimestamps if they are meant to be updated to current time
-      const dataToUpdate = { ...data };
-      if (data.lastLogin && !(data.lastLogin instanceof Timestamp)) { // Example for lastLogin
-         // dataToUpdate.lastLogin = serverTimestamp(); // Uncomment if updating lastLogin to now
-      }
-
-      await updateDoc(userDocRef, dataToUpdate);
-      
-      // Optimistically update context, ensuring dates are JS Dates
+      await updateDoc(userDocRef, data);
       setUserProfile(prev => {
         if (!prev) return null;
         const updatedProfile = { ...prev, ...data };
@@ -102,7 +98,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
         return updatedProfile;
       });
-
       toast({ title: "Profile Updated", description: "Your profile has been successfully updated." });
     } catch (err: any) {
       console.error("Error updating profile: ", err);
@@ -117,13 +112,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setLoading(true);
       setError(null);
       if (firebaseUser) {
+        console.log("Auth state changed: user logged in", firebaseUser.uid);
         setUser(firebaseUser);
         await fetchUserProfileCallback(firebaseUser.uid);
+        // setLoading(false) is handled within fetchUserProfileCallback
       } else {
+        console.log("Auth state changed: user logged out");
         setUser(null);
         setUserProfile(null);
+        setLoading(false);
       }
-      setLoading(false);
     });
     return () => unsubscribe();
   }, [fetchUserProfileCallback]);
@@ -140,14 +138,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         email: newUser.email,
         username: username,
         coins: 1000,
-        createdAt: serverTimestamp() as Timestamp, // Use serverTimestamp for creation
+        createdAt: serverTimestamp() as Timestamp,
         avatarUrl: `https://placehold.co/128x128.png?text=${username.charAt(0).toUpperCase()}`
       };
       await setDoc(userDocRef, newProfileData);
-      // Convert to JS Date for context after creation
       setUserProfile({
-          ...newProfileData, 
-          createdAt: new Date() // Approximate, actual is server time
+          ...newProfileData,
+          createdAt: new Date()
       });
       toast({ title: "Sign Up Successful", description: `Welcome, ${username}!` });
       router.push('/');
@@ -202,17 +199,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           lastLogin: serverTimestamp() as Timestamp
         };
         await setDoc(userDocRef, newProfileData);
-        setUserProfile({ // Set profile in context, converting Timestamps for client use
-            ...newProfileData, 
-            createdAt: new Date(), // Approximate
-            lastLogin: new Date() // Approximate
-        }); 
+        setUserProfile({
+            ...newProfileData,
+            createdAt: new Date(),
+            lastLogin: new Date()
+        });
       } else {
         await updateDoc(userDocRef, {
           lastLogin: serverTimestamp(),
-          avatarUrl: googleUser.photoURL || userDocSnap.data()?.avatarUrl, 
+          avatarUrl: googleUser.photoURL || userDocSnap.data()?.avatarUrl,
         });
-        // Fetching in onAuthStateChanged will update the profile in context.
       }
       toast({ title: "Google Sign-In Successful", description: `Welcome, ${googleUser.displayName || googleUser.email}!` });
       router.push('/');
@@ -244,12 +240,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setLoading(false);
     }
   };
-  
+
   const updateUserProfileInContext = (profileData: Partial<UserProfile>) => {
     setUserProfile(prev => {
       if (!prev) return null;
       const updatedProfile = { ...prev, ...profileData };
-      // Ensure dates are JS Dates if they come in as Timestamps
       if (updatedProfile.createdAt && updatedProfile.createdAt instanceof Timestamp) {
           updatedProfile.createdAt = updatedProfile.createdAt.toDate();
       }
@@ -261,18 +256,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ 
-        user, 
-        userProfile, 
-        loading, 
-        error, 
-        signUp, 
-        signIn, 
-        signInWithGoogle, 
-        signOut, 
-        updateUserProfileInContext, 
-        fetchUserProfile: fetchUserProfileCallback, 
-        updateFirestoreProfile: updateFirestoreProfileCallback 
+    <AuthContext.Provider value={{
+        user,
+        userProfile,
+        loading,
+        error,
+        signUp,
+        signIn,
+        signInWithGoogle,
+        signOut,
+        updateUserProfileInContext,
+        fetchUserProfile: fetchUserProfileCallback,
+        updateFirestoreProfile: updateFirestoreProfileCallback
     }}>
       {children}
     </AuthContext.Provider>

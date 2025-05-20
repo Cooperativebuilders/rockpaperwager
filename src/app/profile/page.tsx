@@ -54,7 +54,7 @@ export default function ProfilePage() {
     );
   }
 
-  // No user after loading, and router.push('/auth') hasn't unmounted yet (should be quick)
+  // No user after loading, and router.push('/auth') hasn't unmount yet (should be quick)
   if (!user) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-background text-foreground p-4 sm:p-8">
@@ -192,23 +192,28 @@ export default function ProfilePage() {
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <p className="text-muted-foreground">Total Games Played:</p>
-                <p className="font-semibold text-lg text-card-foreground">150</p>
+                {/* TODO: Replace with dynamic value */} {/* Original: 150 */}
+                <p className="font-semibold text-lg text-card-foreground">?</p>
               </div>
               <div>
                 <p className="text-muted-foreground">Wins:</p>
-                <p className="font-semibold text-lg text-green-400">90</p>
+                {/* TODO: Replace with dynamic value */} {/* Original: 90 */}
+                <p className="font-semibold text-lg text-green-400">?</p>
               </div>
               <div>
                 <p className="text-muted-foreground">Losses:</p>
-                <p className="font-semibold text-lg text-red-400">55</p>
+                 {/* TODO: Replace with dynamic value */} {/* Original: 55 */}
+                <p className="font-semibold text-lg text-red-400">?</p>
               </div>
               <div>
                 <p className="text-muted-foreground">Draws:</p>
-                <p className="font-semibold text-lg text-yellow-400">5</p>
+                {/* TODO: Replace with dynamic value */} {/* Original: 5 */}
+                <p className="font-semibold text-lg text-yellow-400">?</p>
               </div>
               <div>
                 <p className="text-muted-foreground">Win Rate:</p>
-                <p className="font-semibold text-lg text-card-foreground">60%</p>
+                {/* TODO: Replace with dynamic value */} {/* Original: 60% */}
+                <p className="font-semibold text-lg text-card-foreground">?</p>
               </div>
               <div>
                 <p className="text-muted-foreground">Coins Won:</p>
