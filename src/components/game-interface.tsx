@@ -417,7 +417,7 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
                 size="lg"
                 className="w-full text-lg bg-accent hover:bg-accent/90 text-accent-foreground shadow-md transform transition-transform hover:scale-105 py-3"
               >
-                <Users className="mr-2" /> Create a Lobby (vs Friend)
+                <Users className="mr-2" /> Play a Friend
               </Button>
               <p className="text-center text-muted-foreground my-4">Or Join a Random Game:</p>
               <div className="flex flex-col sm:flex-row sm:gap-4 items-center sm:justify-around mb-6">
