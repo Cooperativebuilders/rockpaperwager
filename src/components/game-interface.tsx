@@ -138,6 +138,10 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
 
   useEffect(() => {
     if (initialLobbyConfig && !isProcessing && gameState !== 'waiting_for_friend') {
+      // Check if this specific lobby config has already been processed to prevent re-initialization on re-renders
+      // This check was causing a build error due to logical contradiction. It's removed.
+      // if (lobbyId === initialLobbyConfig.lobbyId && gameState === 'waiting_for_friend') return; 
+
       if (!user) {
         toast({ title: "Login Required", description: "Please log in to join a lobby.", variant: "destructive" });
         router.push('/auth');
@@ -161,7 +165,7 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
         onLobbyInitialized();
       }
     }
-  }, [initialLobbyConfig, onLobbyInitialized, isProcessing, lobbyId, gameState, user, coins, toast, router]);
+  }, [initialLobbyConfig, onLobbyInitialized, isProcessing, coins, toast, router, user, gameState]);
 
 
   useEffect(() => {
@@ -415,9 +419,9 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
 
   if (authLoading && !userProfile) { // Show loader if auth is loading AND profile isn't available yet
     return (
-      <Card className="w-full shadow-2xl rounded-xl overflow-hidden bg-card min-h-[400px] flex items-center justify-center">
+      <Card className="w-full shadow-2xl rounded-xl overflow-hidden bg-card min-h-[400px] flex flex-col items-center justify-center">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
-        <p className="ml-4 text-card-foreground">Loading Game...</p>
+        <p className="mt-4 text-card-foreground">Loading Game...</p>
       </Card>
     );
   }
