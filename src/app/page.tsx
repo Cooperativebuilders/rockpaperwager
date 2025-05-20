@@ -33,7 +33,6 @@ export default function HomePage() {
   const handleConfirmBetAndInvite = (betAmount: number) => {
     if (friendToInvite) {
       if (betAmount > currentPlayerCoins) {
-        // Consider using a toast for this alert
         alert("You don't have enough coins for this bet."); // TODO: Replace with toast
         return;
       }
@@ -53,15 +52,16 @@ export default function HomePage() {
 
   return (
     <div className="flex flex-col items-center min-h-screen bg-background text-foreground p-4 sm:p-8">
-      <header className="w-full max-w-md mb-8 text-center flex flex-col items-center">
-        <div className="w-full max-w-xs sm:max-w-sm md:max-w-md">
+      <header className="w-full flex justify-center mb-8"> {/* Centering the logo container */}
+        <div className="bg-card p-4 rounded-xl shadow-xl max-w-xs"> {/* Logo container with green background, padding, rounding, shadow, and max-width */}
           <Image
             src="/logo.png"
             alt="Rock Paper Wager Logo"
-            width={728} 
-            height={1000}
-            priority 
-            className="object-contain w-full h-auto"
+            width={728} // Intrinsic width of your image file
+            height={1000} // Intrinsic height of your image file
+            priority
+            className="object-contain w-full h-auto" // Makes image responsive within its parent div
+            data-ai-hint="company logo"
           />
         </div>
       </header>
