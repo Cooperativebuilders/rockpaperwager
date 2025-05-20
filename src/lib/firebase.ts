@@ -4,17 +4,14 @@ import { getAuth, type Auth } from 'firebase/auth';
 import { getFirestore, type Firestore } from 'firebase/firestore';
 // import { getAnalytics, Analytics } from "firebase/analytics"; // Optional: if you want analytics
 
-// IMPORTANT:
-// REPLACE THE PLACEHOLDER VALUES BELOW WITH YOUR ACTUAL FIREBASE PROJECT CONFIGURATION.
-// You can find these in your Firebase project settings in the Firebase Console.
+// Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY", // <--- REPLACE
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com", // <--- REPLACE
-  projectId: "YOUR_PROJECT_ID", // <--- REPLACE
-  storageBucket: "YOUR_PROJECT_ID.appspot.com", // <--- REPLACE
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID", // <--- REPLACE
-  appId: "YOUR_APP_ID", // <--- REPLACE
-  // measurementId: "YOUR_MEASUREMENT_ID" // Optional: if you use Google Analytics
+  apiKey: "AIzaSyB3StV1wQr6YYbj8rnP7Y2iTnE5gFL-tmo",
+  authDomain: "rock-paper-wager.firebaseapp.com",
+  projectId: "rock-paper-wager",
+  storageBucket: "rock-paper-wager.firebasestorage.app",
+  messagingSenderId: "279365393217",
+  appId: "1:279365393217:web:8a291134bab4bba51a1fc0"
 };
 
 // Initialize Firebase
