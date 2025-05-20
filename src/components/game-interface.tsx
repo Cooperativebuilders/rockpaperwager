@@ -556,7 +556,7 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
           )}
 
           {(gameState === 'waiting_for_friend' || gameState === 'searching_for_random') && isProcessing && (
-             <Button onClick={handleCancelAndReturnToInitial} variant="outline" className="w-full mt-auto self-center max-w-xs border-border text-card-foreground hover:bg-muted hover:text-muted-foreground">
+             <Button onClick={handleCancelAndReturnToInitial} variant="outline" className="w-full mt-auto self-center max-w-xs border-border text-foreground hover:bg-muted hover:text-muted-foreground">
               <XCircle className="mr-2"/> Cancel Search/Lobby
             </Button>
           )}
@@ -637,7 +637,7 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
             { gameState === 'choosing_move' && !isProcessing &&
               <Button
                 onClick={handleCancelAndReturnToInitial}
-                className="flex-1 text-lg border-border text-card-foreground hover:bg-muted hover:text-muted-foreground"
+                className="flex-1 text-lg border-border text-foreground hover:bg-muted hover:text-muted-foreground"
                 size="lg"
                 variant="outline"
               >
