@@ -12,7 +12,7 @@ export default function ProfilePage() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="text-3xl font-bold text-primary">User Profile</CardTitle>
-            <Button asChild variant="outline" size="sm" className="text-card-foreground hover:bg-muted hover:text-muted-foreground">
+            <Button asChild variant="outline" size="sm" className="text-foreground hover:bg-muted hover:text-muted-foreground">
               <Link href="/">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Back to Game
