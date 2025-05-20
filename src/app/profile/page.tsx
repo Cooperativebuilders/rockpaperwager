@@ -87,21 +87,23 @@ export default function ProfilePage() {
                 <span className="bg-muted text-muted-foreground text-xs font-semibold px-2 py-1 rounded-full">High Roller</span>
              </div>
           </div>
-
-          <Button asChild className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground mt-4">
-            <Link href="/profile/withdraw">Withdraw Coins</Link>
-          </Button>
-          <Button asChild className="w-full bg-primary hover:bg-primary/90 text-primary-foreground mt-2">
-            <Link href="/profile/edit">Edit Profile</Link>
-          </Button>
-          <Button
-            variant="destructive"
-            className="w-full mt-2"
-            onClick={handleLogout}
-          >
-            <LogOut className="mr-2 h-4 w-4" />
-            Log Out (Simulated)
-          </Button>
+          
+          <div className="mt-6 space-y-2">
+            <Button asChild className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground">
+              <Link href="/profile/withdraw">Withdraw Coins</Link>
+            </Button>
+            <Button asChild className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
+              <Link href="/profile/edit">Edit Profile</Link>
+            </Button>
+            <Button
+              variant="destructive"
+              className="w-full"
+              onClick={handleLogout}
+            >
+              <LogOut className="mr-2 h-4 w-4" />
+              Log Out (Simulated)
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>
