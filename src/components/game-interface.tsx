@@ -4,7 +4,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Wallet, Users, UserPlus, DoorOpen, XCircle, Hourglass, Repeat, Send } from 'lucide-react'; // Removed HandMetal, Hand, Scissors
+import { Wallet, Users, UserPlus, DoorOpen, XCircle, Hourglass, Repeat, Send } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import type { Move, Outcome } from '@/lib/game';
 import { MOVES, determineWinner, MOVE_EMOJIS } from '@/lib/game';
@@ -360,7 +360,10 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
         <CardHeader className="bg-primary/10 p-6">
           <div className="flex justify-between items-center">
             <CardTitle className="text-3xl font-bold text-primary">{getCardTitle()}</CardTitle>
-            <CoinDisplay amount={coins} onPurchaseClick={handleOpenTopUpDialog} />
+            <div className="flex items-center gap-x-3">
+              <span className="text-sm text-foreground hidden sm:inline">Welcome, Player123!</span>
+              <CoinDisplay amount={coins} onPurchaseClick={handleOpenTopUpDialog} />
+            </div>
           </div>
           { (gameState === 'choosing_move' || gameState === 'waiting_for_friend' || gameState === 'searching_for_random' || gameState === 'game_result') && placedBet > 0 &&
             <CardDescription className="text-md pt-2">Current Bet: {placedBet} coins</CardDescription>
@@ -377,7 +380,11 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
 
           {gameState === 'initial' && !isProcessing && (
             <div className="space-y-4">
-              <Button onClick={handleCreateLobbyIntent} size="lg" className="w-full p-6 text-lg">
+              <Button 
+                onClick={handleCreateLobbyIntent} 
+                size="lg" 
+                className="w-full text-lg bg-accent hover:bg-accent/90 text-accent-foreground shadow-md transform transition-transform hover:scale-105 py-3" // Added py-3 for vertical padding
+              >
                 <Users className="mr-2" /> Create a Lobby (vs Friend)
               </Button>
               <p className="text-center text-muted-foreground my-4">Or Join a Random Game:</p>
@@ -442,7 +449,7 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
                     </div>
                   </PopoverContent>
                 </Popover>
-                 {selectedFriendForLobby && <p className="text-sm text-green-600">Selected: {selectedFriendForLobby}</p>}
+                 {selectedFriendForLobby && <p className="text-sm text-green-600 dark:text-green-400">Selected: {selectedFriendForLobby}</p>}
               </div>
               
               <div>
@@ -568,4 +575,3 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
     </TooltipProvider>
   );
 }
-
