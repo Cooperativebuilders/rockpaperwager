@@ -557,7 +557,7 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
 
           {(gameState === 'waiting_for_friend' || gameState === 'searching_for_random') && isProcessing && (
              <Button onClick={handleCancelAndReturnToInitial} variant="outline" className="w-full mt-auto self-center max-w-xs border-border text-foreground hover:bg-muted hover:text-muted-foreground">
-              <XCircle className="mr-2"/> Cancel Search/Lobby
+              <XCircle className="mr-2"/> Cancel
             </Button>
           )}
 
@@ -655,3 +655,4 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
     </TooltipProvider>
   );
 }
+
