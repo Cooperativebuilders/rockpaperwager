@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
@@ -446,7 +447,7 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
                     id="custom-random-bet-slider"
                     value={[customRandomBetAmount]}
                     min={10}
-                    max={Math.min(10000, coins)} // Cap max at user's coins or 10000
+                    max={10000} 
                     step={10}
                     onValueChange={(value) => setCustomRandomBetAmount(value[0])}
                     disabled={isProcessing || coins < 10}
@@ -523,7 +524,7 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
                     id="lobby-bet-slider"
                     value={[lobbyBetAmount]}
                     min={100}
-                    max={Math.min(10000, coins)} // Cap max at user's coins or 10000
+                    max={Math.min(10000, coins)} 
                     step={100}
                     onValueChange={(value) => setLobbyBetAmount(value[0])}
                     disabled={!selectedFriendForLobby || isProcessing || coins < 100}
@@ -647,3 +648,4 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
     </TooltipProvider>
   );
 }
+
