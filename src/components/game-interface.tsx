@@ -2,9 +2,10 @@
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
+import Image from 'next/image'; // Added Image import
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Wallet, Users, UserPlus, DoorOpen, XCircle, Hourglass, Repeat, Settings, Send } from 'lucide-react';
+import { Wallet, Users, DoorOpen, XCircle, Hourglass, Repeat, Settings } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 import type { Move, Outcome } from '@/lib/game';
@@ -18,25 +19,20 @@ import { Input } from '@/components/ui/input';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { Slider } from '@/components/ui/slider';
 import type { LobbyConfig } from '@/app/page';
-import Link from 'next/link'; // Added Link import
+import Link from 'next/link';
 
 // Custom SVG Icon Components inspired by the logo
 const IconRock = (props: React.SVGProps<SVGSVGElement>) => (
   <svg viewBox="0 0 24 24" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
-    {/* Simplified fist shape */}
     <rect x="5" y="10" width="14" height="10" rx="2" fill="hsl(var(--card-foreground))" stroke="hsl(var(--primary))" />
-    {/* Knuckles/fingers part 1 */}
     <path d="M7 10V8C7 6.89543 7.89543 6 9 6H11C12.1046 6 13 6.89543 13 8V10" fill="hsl(var(--card-foreground))" stroke="hsl(var(--primary))" />
-    {/* Knuckles/fingers part 2 */}
     <path d="M11 10V8C11 6.89543 11.8954 6 13 6H15C16.1046 6 17 6.89543 17 8V10" fill="hsl(var(--card-foreground))" stroke="hsl(var(--primary))" />
   </svg>
 );
 
 const IconPaper = (props: React.SVGProps<SVGSVGElement>) => (
   <svg viewBox="0 0 24 24" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
-    {/* Simplified open palm */}
     <path d="M4 16.8V7.2C4 6.0799 4 5.51984 4.21799 5.09202C4.40973 4.71569 4.71569 4.40973 5.09202 4.21799C5.51984 4 6.0799 4 7.2 4H16.8C17.9201 4 18.4802 4 18.908 4.21799C19.2843 4.40973 19.5903 4.71569 19.782 5.09202C20 5.51984 20 6.0799 20 7.2V16.8C20 17.9201 20 18.4802 19.782 18.908C19.5903 19.2843 19.2843 19.5903 18.908 19.782C18.4802 20 17.9201 20 16.8 20H7.2C6.0799 20 5.51984 20 5.09202 19.782C4.71569 19.5903 4.40973 19.2843 4.21799 18.908C4 18.4802 4 17.9201 4 16.8Z" fill="hsl(var(--card-foreground))" stroke="hsl(var(--primary))"/>
-    {/* Finger lines */}
     <line x1="8" y1="8" x2="8" y2="16" stroke="hsl(var(--primary))" />
     <line x1="12" y1="6" x2="12" y2="16" stroke="hsl(var(--primary))" />
     <line x1="16" y1="8" x2="16" y2="16" stroke="hsl(var(--primary))" />
@@ -45,12 +41,9 @@ const IconPaper = (props: React.SVGProps<SVGSVGElement>) => (
 
 const IconScissors = (props: React.SVGProps<SVGSVGElement>) => (
   <svg viewBox="0 0 24 24" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
-    {/* Palm part of scissors hand */}
     <path d="M7 21V13C7 11.3431 8.34315 10 10 10H14C15.6569 10 17 11.3431 17 13V21H7Z" fill="hsl(var(--card-foreground))" stroke="hsl(var(--primary))" />
-    {/* Two fingers forming V */}
     <path d="M10 10L6 3" fill="none" stroke="hsl(var(--primary))" />
     <path d="M14 10L18 3" fill="none" stroke="hsl(var(--primary))" />
-    {/* Circles for finger joints (optional detail) */}
     <circle cx="7.5" cy="13.5" r="1.5" fill="hsl(var(--card-foreground))" stroke="hsl(var(--primary))" />
     <circle cx="16.5" cy="13.5" r="1.5" fill="hsl(var(--card-foreground))" stroke="hsl(var(--primary))" />
   </svg>
@@ -72,7 +65,7 @@ const MOVE_ICONS: Record<Move, React.ElementType> = {
   scissors: IconScissors,
 };
 
-const FIXED_BET_AMOUNTS = [10, 100, 1000]; // For "Join Random Game" buttons
+const FIXED_BET_AMOUNTS = [10, 100, 1000];
 const SIMULATED_FRIENDS_LIST = ['Alice (Simulated)', 'Bob (Simulated)', 'Charlie (Simulated)', 'Dave (Simulated)', 'Eve (Simulated)', 'Mallory (Simulated)'];
 
 interface GameInterfaceProps {
@@ -119,27 +112,23 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
 
   useEffect(() => {
     if (initialLobbyConfig && !isProcessing) {
-      // Prevent re-initialization if already in the target state with the same lobby ID
       if (lobbyId === initialLobbyConfig.lobbyId && gameState === 'waiting_for_friend') return;
 
       setOpponentName(initialLobbyConfig.friendName);
       setPlacedBet(initialLobbyConfig.betAmount);
       setLobbyId(initialLobbyConfig.lobbyId);
       
-      // Reset game-specific states
       setPlayerMove(null);
       setOpponentMove(null);
       setResultText('');
       setStatusMessage('');
-      setIsProcessing(false); // Ensure processing is reset
-      setSelectedFriendForLobby(null); // Reset lobby creation states
+      setIsProcessing(false);
+      setSelectedFriendForLobby(null);
       setSearchTerm('');
       setLobbyBetAmount(100);
 
-
       setGameState('waiting_for_friend');
-      // toast({ title: `Lobby with ${initialLobbyConfig.friendName} created!`, description: `Bet: ${initialLobbyConfig.betAmount} coins. Lobby ID: ${initialLobbyConfig.lobbyId}`});
-
+      
       if (onLobbyInitialized) {
         onLobbyInitialized();
       }
@@ -226,8 +215,8 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
     resetCommonStates();
     setSelectedFriendForLobby(null);
     setSearchTerm('');
-    setOpponentName("Friend"); // Default for lobby creation
-    setLobbyBetAmount(100); // Default bet for lobby
+    setOpponentName("Friend"); 
+    setLobbyBetAmount(100); 
     setGameState('selecting_bet_for_lobby');
   };
 
@@ -258,8 +247,8 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
       return;
     }
     setPlacedBet(amount);
-    setLobbyId(null); // No lobby ID for random games
-    setOpponentName("Random Player"); // Set opponent for random game
+    setLobbyId(null); 
+    setOpponentName("Random Player"); 
     resetCommonStates();
     setGameState('searching_for_random');
   };
@@ -274,8 +263,8 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
     resetCommonStates();
     setPlacedBet(0);
     setLobbyId(null);
-    setOpponentName("Opponent"); // Reset opponent name
-    setSelectedFriendForLobby(null); // Reset lobby creation states
+    setOpponentName("Opponent"); 
+    setSelectedFriendForLobby(null); 
     setSearchTerm('');
     setIsSuggestionsPopoverOpen(false);
     setLobbyBetAmount(100);
@@ -314,7 +303,7 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
   const handleSearchTermChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newSearchTerm = e.target.value;
     setSearchTerm(newSearchTerm);
-    setSelectedFriendForLobby(null); // Clear selection if user types again
+    setSelectedFriendForLobby(null); 
 
     if (newSearchTerm.trim() === '') {
       setIsSuggestionsPopoverOpen(false);
@@ -327,8 +316,8 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
   };
 
   const handleSuggestionClick = (friendName: string) => {
-    setSelectedFriendForLobby(friendName.replace(" (Simulated)", "")); // Store name without "(Simulated)"
-    setSearchTerm(friendName); // Update input to show full selected name
+    setSelectedFriendForLobby(friendName.replace(" (Simulated)", "")); 
+    setSearchTerm(friendName); 
     setIsSuggestionsPopoverOpen(false);
   };
 
@@ -350,19 +339,7 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
     );
   };
 
-  const getCardTitleText = () => {
-    switch (gameState) {
-      case 'initial': return "Rock Paper Wager";
-      case 'selecting_bet_for_lobby': return "Create Lobby";
-      case 'waiting_for_friend': return `Lobby with ${opponentName}`;
-      case 'searching_for_random': return `Searching for ${opponentName}`;
-      case 'choosing_move': return `Your Turn vs ${opponentName}`;
-      case 'revealing_moves':
-      case 'game_result':
-        return `Results vs ${opponentName}`;
-      default: return "Rock Paper Wager";
-    }
-  };
+  // getCardTitleText is removed as logo takes its place in the header.
 
   const filteredSuggestions = SIMULATED_FRIENDS_LIST.filter(friend =>
     friend.toLowerCase().includes(searchTerm.toLowerCase())
@@ -379,23 +356,29 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
                 <AvatarImage src="https://placehold.co/64x64.png" alt="User Avatar" data-ai-hint="user avatar" />
                 <AvatarFallback className="bg-muted text-muted-foreground">P</AvatarFallback>
               </Avatar>
-              <span className="text-xl font-semibold text-foreground">
+              <span className="text-xl font-semibold text-card-foreground"> {/* Changed text-foreground to text-card-foreground */}
                 Player123
               </span>
             </div>
 
-            {/* Center: Game Title */}
-            <div className="flex-grow text-center px-4">
-              <CardTitle className="text-3xl font-bold text-primary inline-block">
-                {getCardTitleText()}
-              </CardTitle>
+            {/* Center: Logo */}
+            <div className="flex-grow flex justify-center items-center px-4">
+              <Image
+                src="/logo.png"
+                alt="Rock Paper Wager Logo"
+                width={728} 
+                height={1000} 
+                className="h-10 w-auto object-contain" 
+                priority
+                data-ai-hint="company logo"
+              />
             </div>
 
             {/* Right: Settings and Coin Display */}
             <div className="flex items-center gap-x-2">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button asChild variant="ghost" size="icon" className="h-10 w-10 text-foreground hover:bg-accent/20">
+                  <Button asChild variant="ghost" size="icon" className="h-10 w-10 text-card-foreground hover:bg-accent/20">
                     <Link href="/profile">
                        <Settings className="h-6 w-6" />
                        <span className="sr-only">Profile Settings</span>
@@ -489,7 +472,7 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
                           placeholder="Type to search friends..."
                           value={searchTerm}
                           onChange={handleSearchTermChange}
-                          onFocus={() => { // Open popover on focus if there's text and results
+                          onFocus={() => { 
                             if (searchTerm.trim() && filteredSuggestions.length > 0) {
                               setIsSuggestionsPopoverOpen(true);
                             }
@@ -500,16 +483,16 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
                       </div>
                   </PopoverTrigger>
                   <PopoverContent
-                    className="w-[--radix-popover-trigger-width] p-0 bg-popover border-border" // Ensure popover width matches trigger
+                    className="w-[--radix-popover-trigger-width] p-0 bg-popover border-border" 
                     align="start"
-                    onOpenAutoFocus={(e) => e.preventDefault()} // Prevent focus stealing
+                    onOpenAutoFocus={(e) => e.preventDefault()} 
                   >
                     <div className="max-h-40 overflow-y-auto">
                     {filteredSuggestions.map((friend) => (
                       <div
                         key={friend}
                         className="px-3 py-2 text-sm cursor-pointer text-popover-foreground hover:bg-accent hover:text-accent-foreground"
-                        onMouseDown={() => handleSuggestionClick(friend)} // Use onMouseDown to prevent blur before click
+                        onMouseDown={() => handleSuggestionClick(friend)} 
                       >
                         {friend}
                       </div>
@@ -532,14 +515,14 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
                   </div>
                   <Slider
                     id="lobby-bet-slider"
-                    value={[lobbyBetAmount]} // Make it a controlled component
+                    value={[lobbyBetAmount]} 
                     min={100}
-                    max={Math.min(10000, coins)} // Cap at player's coins or 10k
+                    max={Math.min(10000, coins)} 
                     step={100}
                     onValueChange={(value) => setLobbyBetAmount(value[0])}
                     disabled={!selectedFriendForLobby || isProcessing || coins < 100}
                     aria-label="Lobby bet amount slider"
-                    className="data-[disabled]:opacity-50" // Style for disabled state
+                    className="data-[disabled]:opacity-50" 
                   />
               </div>
               <Button
@@ -658,4 +641,3 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
     </TooltipProvider>
   );
 }
-

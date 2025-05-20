@@ -5,7 +5,7 @@ import { useState } from 'react';
 import GameInterface from '@/components/game-interface';
 import FriendManagement from '@/components/friend-management';
 import { BetSelectionDialog } from '@/components/bet-selection-dialog';
-import Image from 'next/image';
+// Removed Image import as logo is moved
 
 export interface LobbyConfig {
   friendName: string;
@@ -53,20 +53,8 @@ export default function HomePage() {
 
   return (
     <div className="flex flex-col items-center min-h-screen bg-background text-foreground p-4 sm:p-8">
-      <header className="w-full flex justify-center mb-8"> {/* Centering the logo container */}
-        <div className="bg-card p-4 rounded-xl shadow-xl max-w-md"> {/* Logo container with green background, padding, rounding, shadow, and adjusted max-width */}
-          <Image
-            src="/logo.png" // Make sure public/logo.png exists
-            alt="Rock Paper Wager Logo"
-            width={728} // Actual width of your logo.png
-            height={1000} // Actual height of your logo.png
-            priority // Good for LCP
-            className="object-contain w-full h-auto" // Makes image responsive within its parent div
-            data-ai-hint="company logo"
-          />
-        </div>
-      </header>
-      <main className="w-full max-w-lg space-y-8">
+      {/* Logo section removed from here */}
+      <main className="w-full max-w-lg space-y-8 mt-8"> {/* Added mt-8 for spacing since logo header is gone */}
         <GameInterface
           initialLobbyConfig={lobbyConfigForGame}
           onLobbyInitialized={handleLobbyInitialized}
