@@ -52,6 +52,19 @@ body {
     --sidebar-accent-foreground: 45 50% 90%; /* Light Beige/Cream */
     --sidebar-border: 120 25% 25%; /* Dark Green Border */
     --sidebar-ring: 40 80% 60%; /* Lighter Golden Yellow */
+
+    /* New colors for bet buttons */
+    --bronze: 25 60% 40%;
+    --bronze-foreground: 25 20% 90%;
+    --bronze-hover: 25 60% 35%;
+
+    --silver: 210 15% 75%;
+    --silver-foreground: 210 20% 15%;
+    --silver-hover: 210 15% 70%;
+
+    --gold: 40 80% 50%; /* Same as accent */
+    --gold-foreground: 120 25% 15%; /* Same as accent-foreground */
+    --gold-hover: 40 80% 45%; /* Slightly darker accent */
   }
 
   .dark {
@@ -97,6 +110,19 @@ body {
     --sidebar-accent-foreground: 45 50% 90%; /* Light Beige/Cream */
     --sidebar-border: 120 25% 25%; /* Dark Green Border */
     --sidebar-ring: 40 80% 60%; /* Lighter Golden Yellow */
+
+    /* New colors for bet buttons - ensure they are defined for dark too if needed, though app might be dark by default */
+    --bronze: 25 60% 40%;
+    --bronze-foreground: 25 20% 90%;
+    --bronze-hover: 25 60% 35%;
+
+    --silver: 210 15% 75%;
+    --silver-foreground: 210 20% 15%;
+    --silver-hover: 210 15% 70%;
+
+    --gold: 40 80% 50%;
+    --gold-foreground: 120 25% 15%;
+    --gold-hover: 40 80% 45%;
   }
 }
 

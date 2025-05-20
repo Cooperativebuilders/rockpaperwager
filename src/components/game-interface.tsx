@@ -5,7 +5,7 @@ import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, DoorOpen, XCircle, Hourglass, Repeat, Settings } from 'lucide-react'; // Removed Wallet
+import { Users, DoorOpen, XCircle, Hourglass, Repeat, Settings } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 import type { Move, Outcome } from '@/lib/game';
@@ -70,12 +70,12 @@ const MOVE_ICONS: Record<Move, React.ElementType<CustomIconProps>> = {
   scissors: IconScissors,
 };
 
-const FIXED_BET_AMOUNTS = [10, 100, 1000];
-const FIXED_BET_ICONS: Record<number, React.ElementType<CustomIconProps>> = {
-  10: IconRock,
-  100: IconPaper,
-  1000: IconScissors,
-};
+const FIXED_BET_CONFIGS = [
+  { amount: 10, icon: IconRock, name: 'Bronze', bgColor: 'bg-[hsl(var(--bronze))]', hoverBgColor: 'hover:bg-[hsl(var(--bronze-hover))]', textColor: 'text-[hsl(var(--bronze-foreground))]', iconFill: 'hsl(var(--bronze-foreground))', iconStroke: 'hsl(var(--bronze-foreground))' },
+  { amount: 100, icon: IconPaper, name: 'Silver', bgColor: 'bg-[hsl(var(--silver))]', hoverBgColor: 'hover:bg-[hsl(var(--silver-hover))]', textColor: 'text-[hsl(var(--silver-foreground))]', iconFill: 'hsl(var(--silver-foreground))', iconStroke: 'hsl(var(--silver-foreground))' },
+  { amount: 1000, icon: IconScissors, name: 'Gold', bgColor: 'bg-[hsl(var(--gold))]', hoverBgColor: 'hover:bg-[hsl(var(--gold-hover))]', textColor: 'text-[hsl(var(--gold-foreground))]', iconFill: 'hsl(var(--gold-foreground))', iconStroke: 'hsl(var(--gold-foreground))' },
+];
+
 const SIMULATED_FRIENDS_LIST = ['Alice (Simulated)', 'Bob (Simulated)', 'Charlie (Simulated)', 'Dave (Simulated)', 'Eve (Simulated)', 'Mallory (Simulated)'];
 
 interface GameInterfaceProps {
@@ -421,18 +421,23 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
               </Button>
               <p className="text-center text-muted-foreground my-4">Or Join a Random Game:</p>
               <div className="flex flex-col sm:flex-row sm:gap-4 items-center sm:justify-around mb-6">
-                {FIXED_BET_AMOUNTS.map((amount) => {
-                  const IconComponent = FIXED_BET_ICONS[amount];
+                {FIXED_BET_CONFIGS.map((config) => {
+                  const IconComponent = config.icon;
                   return (
                     <Button
-                      key={`join-${amount}`}
-                      onClick={() => handleJoinRandomGame(amount)}
-                      className="rounded-lg w-28 h-32 flex flex-col items-center justify-center p-2 text-lg bg-accent hover:bg-accent/90 text-accent-foreground shadow-md transform transition-transform hover:scale-105 disabled:opacity-70 disabled:cursor-not-allowed"
-                      disabled={isProcessing || amount > coins}
-                      aria-label={`Join random game with ${amount} coins bet`}
+                      key={`join-${config.amount}`}
+                      onClick={() => handleJoinRandomGame(config.amount)}
+                      className={cn(
+                        "rounded-lg w-28 h-32 flex flex-col items-center justify-center p-2 text-lg shadow-md transform transition-transform hover:scale-105 disabled:opacity-70 disabled:cursor-not-allowed",
+                        config.bgColor,
+                        config.hoverBgColor,
+                        config.textColor
+                      )}
+                      disabled={isProcessing || config.amount > coins}
+                      aria-label={`Join random game with ${config.amount} coins bet (${config.name})`}
                     >
-                      <IconComponent className="w-12 h-12 mb-1" fillColor="hsl(var(--accent-foreground))" strokeColor="hsl(var(--accent-foreground))" />
-                      <span className="text-xl font-bold">{amount}</span>
+                      <IconComponent className="w-12 h-12 mb-1" fillColor={config.iconFill} strokeColor={config.iconStroke} />
+                      <span className="text-xl font-bold">{config.amount}</span>
                       <span className="text-xs font-medium">COINS</span>
                     </Button>
                   );
@@ -650,4 +655,3 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
     </TooltipProvider>
   );
 }
-
