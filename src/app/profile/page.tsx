@@ -72,7 +72,10 @@ export default function ProfilePage() {
              </div>
           </div>
 
-          <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground mt-6" disabled>
+          <Button className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground mt-4" disabled>
+            Withdraw Coins (Not Implemented)
+          </Button>
+          <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground mt-2" disabled>
             Edit Profile (Not Implemented)
           </Button>
         </CardContent>
