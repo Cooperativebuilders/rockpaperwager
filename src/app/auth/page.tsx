@@ -8,10 +8,10 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useToast } from "@/hooks/use-toast";
-import { Mail, Lock, User, LogIn, UserPlus } from 'lucide-react';
+import { Mail, Lock, User, LogIn, UserPlus, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { Separator } from '@/components/ui/separator';
+import { useAuth } from '@/contexts/auth-context'; // Import useAuth
 
 // A simple inline SVG for Google G icon
 const GoogleIcon = () => (
@@ -24,9 +24,8 @@ const GoogleIcon = () => (
   </svg>
 );
 
-
 export default function AuthPage() {
-  const { toast } = useToast();
+  const { signUp, signIn, signInWithGoogle, loading, error } = useAuth(); // Use auth context
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [signupUsername, setSignupUsername] = useState('');
@@ -34,41 +33,24 @@ export default function AuthPage() {
   const [signupPassword, setSignupPassword] = useState('');
   const [signupConfirmPassword, setSignupConfirmPassword] = useState('');
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Simulate login
-    toast({
-      title: "Login Attempt (Simulated)",
-      description: `Would log in with email: ${loginEmail}`,
-    });
-    // In a real app, redirect to '/' or dashboard after successful login
+    await signIn(loginEmail, loginPassword);
   };
 
-  const handleSignUp = (e: React.FormEvent) => {
+  const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (signupPassword !== signupConfirmPassword) {
-      toast({
-        title: "Sign Up Error",
-        description: "Passwords do not match.",
-        variant: "destructive",
-      });
+      // This validation should ideally be handled by the useAuth hook or show a local error.
+      // For simplicity, let's keep the toast logic in useAuth for Firebase errors.
+      alert("Passwords do not match."); // Simple alert for now
       return;
     }
-    // Simulate sign up
-    toast({
-      title: "Sign Up Attempt (Simulated)",
-      description: `Would sign up user: ${signupUsername} with email: ${signupEmail}`,
-    });
-    // In a real app, redirect to '/' or dashboard after successful sign up
+    await signUp(signupUsername, signupEmail, signupPassword);
   };
 
-  const handleGoogleSignIn = () => {
-    // Simulate Google Sign-In
-    toast({
-      title: "Google Sign-In (Simulated)",
-      description: "Google Sign-In process would be initiated here.",
-    });
-    // In a real app, redirect to '/' or dashboard after successful Google sign-in
+  const handleGoogleSignIn = async () => {
+    await signInWithGoogle();
   };
 
   return (
@@ -114,6 +96,7 @@ export default function AuthPage() {
                       onChange={(e) => setLoginEmail(e.target.value)}
                       required
                       className="bg-input text-foreground pl-10"
+                      disabled={loading}
                     />
                   </div>
                 </div>
@@ -129,11 +112,12 @@ export default function AuthPage() {
                       onChange={(e) => setLoginPassword(e.target.value)}
                       required
                       className="bg-input text-foreground pl-10"
+                      disabled={loading}
                     />
                   </div>
                 </div>
-                <Button type="submit" className="w-full bg-accent hover:bg-accent/90 text-accent-foreground text-lg py-3">
-                  Login
+                <Button type="submit" className="w-full bg-accent hover:bg-accent/90 text-accent-foreground text-lg py-3" disabled={loading}>
+                  {loading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : 'Login'}
                 </Button>
               </form>
               <div className="relative my-4">
@@ -142,8 +126,8 @@ export default function AuthPage() {
                   OR
                 </span>
               </div>
-              <Button variant="outline" onClick={handleGoogleSignIn} className="w-full text-foreground hover:bg-muted hover:text-muted-foreground">
-                <GoogleIcon />
+              <Button variant="outline" onClick={handleGoogleSignIn} className="w-full text-foreground hover:bg-muted hover:text-muted-foreground" disabled={loading}>
+                {loading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <GoogleIcon />}
                 Sign in with Google
               </Button>
             </CardContent>
@@ -164,6 +148,7 @@ export default function AuthPage() {
                       onChange={(e) => setSignupUsername(e.target.value)}
                       required
                       className="bg-input text-foreground pl-10"
+                      disabled={loading}
                     />
                   </div>
                 </div>
@@ -179,6 +164,7 @@ export default function AuthPage() {
                       onChange={(e) => setSignupEmail(e.target.value)}
                       required
                       className="bg-input text-foreground pl-10"
+                      disabled={loading}
                     />
                   </div>
                 </div>
@@ -194,6 +180,7 @@ export default function AuthPage() {
                       onChange={(e) => setSignupPassword(e.target.value)}
                       required
                       className="bg-input text-foreground pl-10"
+                      disabled={loading}
                     />
                   </div>
                 </div>
@@ -209,11 +196,12 @@ export default function AuthPage() {
                       onChange={(e) => setSignupConfirmPassword(e.target.value)}
                       required
                       className="bg-input text-foreground pl-10"
+                      disabled={loading}
                     />
                   </div>
                 </div>
-                <Button type="submit" className="w-full bg-accent hover:bg-accent/90 text-accent-foreground text-lg py-3">
-                  Sign Up
+                <Button type="submit" className="w-full bg-accent hover:bg-accent/90 text-accent-foreground text-lg py-3" disabled={loading}>
+                  {loading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : 'Sign Up'}
                 </Button>
               </form>
               <div className="relative my-4">
@@ -222,13 +210,16 @@ export default function AuthPage() {
                   OR
                 </span>
               </div>
-              <Button variant="outline" onClick={handleGoogleSignIn} className="w-full text-foreground hover:bg-muted hover:text-muted-foreground">
-                 <GoogleIcon />
+              <Button variant="outline" onClick={handleGoogleSignIn} className="w-full text-foreground hover:bg-muted hover:text-muted-foreground" disabled={loading}>
+                 {loading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <GoogleIcon />}
                 Sign in with Google
               </Button>
             </CardContent>
           </TabsContent>
         </Tabs>
+        {error && (
+          <p className="text-destructive text-center text-sm p-4">{error}</p>
+        )}
         <CardFooter className="pt-6 flex justify-center">
            <p className="text-xs text-muted-foreground">
             By signing up, you agree to our (simulated) Terms of Service.

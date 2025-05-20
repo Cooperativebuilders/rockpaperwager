@@ -5,32 +5,70 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import Link from 'next/link';
-import { ArrowLeft, LogOut, UserCircle, Home, CreditCard } from "lucide-react";
-import { useRouter } from 'next/navigation';
-import { useToast } from "@/hooks/use-toast";
+import { ArrowLeft, LogOut, UserCircle, Home, CreditCard, Loader2 } from "lucide-react";
+import { useAuth, type UserProfile as AuthUserProfile } from '@/contexts/auth-context'; // Import useAuth
+import { useEffect, useState } from "react";
 import { Separator } from "@/components/ui/separator";
+import { useRouter } from "next/navigation";
+
 
 export default function ProfilePage() {
+  const { user, userProfile, signOut, loading: authLoading, fetchUserProfile: fetchAuthUserProfile } = useAuth();
   const router = useRouter();
-  const { toast } = useToast();
+  const [profileData, setProfileData] = useState<AuthUserProfile | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const handleLogout = () => {
-    // In a real app, you'd clear authentication tokens/session here
-    toast({
-      title: "Logged Out (Simulated)",
-      description: "You have been successfully logged out.",
-    });
-    router.push('/auth');
-  };
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/auth'); // Redirect if not authenticated
+    }
+  }, [user, authLoading, router]);
+  
+  useEffect(() => {
+    if (userProfile) {
+      setProfileData(userProfile);
+      setIsLoading(false);
+    } else if (user && !userProfile && !authLoading) {
+      // If userProfile is null in context but user exists, try fetching it.
+      // This can happen on direct navigation to /profile if context hasn't fully populated.
+      const loadProfile = async () => {
+        setIsLoading(true);
+        const fetched = await fetchAuthUserProfile(user.uid);
+        if (fetched) {
+          setProfileData(fetched);
+        }
+        setIsLoading(false);
+      };
+      loadProfile();
+    } else if (!user && !authLoading) {
+       setIsLoading(false); // Not logged in, nothing to load
+    }
+  }, [user, userProfile, authLoading, fetchAuthUserProfile]);
 
-  // Simulate user data
-  const username = "Player123";
-  const email = "player123@example.com (Simulated)";
-  const joinDate = "January 1, 2024 (Simulated)";
-  const fullName = "John Doe (Simulated & Private)";
-  const address = "123 Main St, Anytown, USA (Simulated & Private)";
-  const iban = "DE89 3704 0044 0532 0130 00 (Simulated & Private)";
-  const bic = "COBADEFFXXX (Simulated & Private)";
+
+  if (authLoading || isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-background text-foreground p-4 sm:p-8">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        <p className="mt-4 text-muted-foreground">Loading profile...</p>
+      </div>
+    );
+  }
+
+  if (!user || !profileData) {
+     // Should be redirected by useEffect, but as a fallback:
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-background text-foreground p-4 sm:p-8">
+        <p>You need to be logged in to view this page.</p>
+        <Button asChild className="mt-4">
+          <Link href="/auth">Login</Link>
+        </Button>
+      </div>
+    );
+  }
+  
+  // Simulated join date for display if not present
+  const joinDate = profileData.createdAt?.toDate ? profileData.createdAt.toDate().toLocaleDateString() : "Not available";
 
 
   return (
@@ -52,14 +90,14 @@ export default function ProfilePage() {
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-center space-x-4"> {/* Avatar and text details */}
               <Avatar className="h-16 w-16 border-2 border-accent">
-                <AvatarImage src="https://placehold.co/128x128.png" alt="User Avatar" data-ai-hint="user avatar" />
+                <AvatarImage src={profileData.avatarUrl || `https://placehold.co/128x128.png?text=${profileData.username.charAt(0).toUpperCase()}`} alt={profileData.username} data-ai-hint="user avatar" />
                 <AvatarFallback className="bg-muted text-muted-foreground text-2xl">
-                  {username.charAt(0).toUpperCase()}
+                  {profileData.username.charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <div>
-                <h2 className="text-xl font-semibold text-card-foreground">{username}</h2>
-                <p className="text-xs text-muted-foreground">{email}</p>
+                <h2 className="text-xl font-semibold text-card-foreground">{profileData.username}</h2>
+                <p className="text-xs text-muted-foreground">{profileData.email}</p>
                 <p className="text-xs text-muted-foreground">Joined: {joinDate}</p>
               </div>
             </div>
@@ -80,28 +118,28 @@ export default function ProfilePage() {
                 <UserCircle className="h-5 w-5 mr-3 mt-0.5 text-muted-foreground flex-shrink-0" />
                 <div>
                   <p className="text-muted-foreground">Full Name:</p>
-                  <p className="font-medium text-card-foreground">{fullName}</p>
+                  <p className="font-medium text-card-foreground">{profileData.fullName || "Not set"}</p>
                 </div>
               </div>
               <div className="flex items-start">
                 <Home className="h-5 w-5 mr-3 mt-0.5 text-muted-foreground flex-shrink-0" />
                 <div>
                   <p className="text-muted-foreground">Address:</p>
-                  <p className="font-medium text-card-foreground">{address}</p>
+                  <p className="font-medium text-card-foreground">{profileData.address || "Not set"}</p>
                 </div>
               </div>
               <div className="flex items-start">
                 <CreditCard className="h-5 w-5 mr-3 mt-0.5 text-muted-foreground flex-shrink-0" />
                 <div>
                   <p className="text-muted-foreground">IBAN (for withdrawal):</p>
-                  <p className="font-medium text-card-foreground">{iban}</p>
+                  <p className="font-medium text-card-foreground">{profileData.iban || "Not set"}</p>
                 </div>
               </div>
               <div className="flex items-start">
                 <CreditCard className="h-5 w-5 mr-3 mt-0.5 text-muted-foreground flex-shrink-0" />
                 <div>
                   <p className="text-muted-foreground">BIC/SWIFT (for withdrawal):</p>
-                  <p className="font-medium text-card-foreground">{bic}</p>
+                  <p className="font-medium text-card-foreground">{profileData.bic || "Not set"}</p>
                 </div>
               </div>
             </div>
@@ -134,7 +172,7 @@ export default function ProfilePage() {
               </div>
               <div>
                 <p className="text-muted-foreground">Coins Won:</p>
-                <p className="font-semibold text-lg text-accent">12,500</p>
+                <p className="font-semibold text-lg text-accent">{profileData.coins.toLocaleString()}</p>
               </div>
             </div>
           </div>
@@ -158,10 +196,11 @@ export default function ProfilePage() {
             <Button
               variant="destructive"
               className="w-full"
-              onClick={handleLogout}
+              onClick={signOut}
+              disabled={authLoading}
             >
-              <LogOut className="mr-2 h-4 w-4" />
-              Log Out (Simulated)
+              {authLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <LogOut className="mr-2 h-4 w-4" />}
+              Log Out
             </Button>
           </div>
         </CardContent>
@@ -169,4 +208,3 @@ export default function ProfilePage() {
     </div>
   );
 }
-
