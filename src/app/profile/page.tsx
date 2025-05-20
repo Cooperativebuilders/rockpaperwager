@@ -10,6 +10,7 @@ import { useAuth, type UserProfile as AuthUserProfile } from '@/contexts/auth-co
 import { useEffect, useState } from "react";
 import { Separator } from "@/components/ui/separator";
 import { useRouter } from "next/navigation";
+import { Timestamp } from 'firebase/firestore';
 
 
 export default function ProfilePage() {
@@ -29,6 +30,7 @@ export default function ProfilePage() {
                 setProfileData(userProfile);
             } else { // User authenticated, but AuthContext failed to load profile (or it's genuinely null)
                 setProfileData(null);
+                // Use the error from AuthContext if it exists and a profile wasn't loaded
                 setPageSpecificError(authContextError || "Your profile data could not be loaded. Please try again later.");
             }
         } else { // No user authenticated, redirect to auth page
@@ -97,7 +99,18 @@ export default function ProfilePage() {
     );
   }
   
-  const joinDate = profileData.createdAt?.toDate ? profileData.createdAt.toDate().toLocaleDateString() : "Not available";
+  const getDisplayDate = (dateValue: Timestamp | Date | undefined): string => {
+    if (!dateValue) return "Not available";
+    if (dateValue instanceof Timestamp) {
+      return dateValue.toDate().toLocaleDateString();
+    }
+    if (dateValue instanceof Date) {
+      return dateValue.toLocaleDateString();
+    }
+    return "Invalid date";
+  };
+
+  const joinDate = getDisplayDate(profileData.createdAt);
 
 
   return (
@@ -118,7 +131,7 @@ export default function ProfilePage() {
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-center space-x-4"> 
               <Avatar className="h-12 w-12 border-2 border-accent">
-                <AvatarImage src={profileData.avatarUrl || `https://placehold.co/128x128.png?text=${profileData.username.charAt(0).toUpperCase()}`} alt={profileData.username} data-ai-hint="user avatar" />
+                <AvatarImage src={profileData.avatarUrl || `https://placehold.co/64x64.png?text=${profileData.username.charAt(0).toUpperCase()}`} alt={profileData.username} data-ai-hint="user avatar" />
                 <AvatarFallback className="bg-muted text-muted-foreground text-xl">
                   {profileData.username.charAt(0).toUpperCase()}
                 </AvatarFallback>
