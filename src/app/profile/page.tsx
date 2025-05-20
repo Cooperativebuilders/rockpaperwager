@@ -1,11 +1,27 @@
 
+"use client";
+
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import Link from 'next/link';
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, LogOut } from "lucide-react";
+import { useRouter } from 'next/navigation';
+import { useToast } from "@/hooks/use-toast";
 
 export default function ProfilePage() {
+  const router = useRouter();
+  const { toast } = useToast();
+
+  const handleLogout = () => {
+    // In a real app, you'd clear authentication tokens/session here
+    toast({
+      title: "Logged Out (Simulated)",
+      description: "You have been successfully logged out.",
+    });
+    router.push('/auth');
+  };
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-background text-foreground p-4 sm:p-8">
       <Card className="w-full max-w-lg shadow-xl rounded-xl bg-card text-card-foreground">
@@ -77,6 +93,14 @@ export default function ProfilePage() {
           </Button>
           <Button asChild className="w-full bg-primary hover:bg-primary/90 text-primary-foreground mt-2">
             <Link href="/profile/edit">Edit Profile</Link>
+          </Button>
+          <Button
+            variant="destructive"
+            className="w-full mt-2"
+            onClick={handleLogout}
+          >
+            <LogOut className="mr-2 h-4 w-4" />
+            Log Out (Simulated)
           </Button>
         </CardContent>
       </Card>
