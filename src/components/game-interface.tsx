@@ -138,7 +138,6 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
 
   useEffect(() => {
     if (initialLobbyConfig && !isProcessing && gameState !== 'waiting_for_friend') {
-      if (lobbyId === initialLobbyConfig.lobbyId && gameState === 'waiting_for_friend') return;
       if (!user) {
         toast({ title: "Login Required", description: "Please log in to join a lobby.", variant: "destructive" });
         router.push('/auth');
@@ -400,7 +399,7 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
         disabled={isProcessing || !user}
         aria-label={`Choose ${move}`}
       >
-        <IconComponent className="w-10 h-10 mr-2" fillColor="hsl(var(--card-foreground))" strokeColor="hsl(var(--primary))" />
+        <IconComponent className="w-10 h-10 mr-2" fillColor="hsl(var(--primary))" strokeColor="hsl(var(--card-foreground))" />
         <span className="capitalize text-lg">{move}</span>
       </Button>
     );
@@ -714,7 +713,7 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
                 size="lg"
                 variant="outline"
               >
-                <DoorOpen className="mr-2"/> Leave Game
+                <DoorOpen className="mr-2"/> Cancel
               </Button>
             }
           </CardFooter>
@@ -730,3 +729,4 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
     </TooltipProvider>
   );
 }
+
