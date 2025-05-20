@@ -4,7 +4,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Wallet, Users, UserPlus, DoorOpen, XCircle, Hourglass, Repeat, Settings } from 'lucide-react';
+import { Wallet, Users, UserPlus, DoorOpen, XCircle, Hourglass, Repeat, Settings, Send } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 import type { Move, Outcome } from '@/lib/game';
@@ -490,7 +490,7 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
                     <Label htmlFor="lobby-bet-slider" className="text-md font-semibold text-muted-foreground">
                       Bet Amount:
                     </Label>
-                    <span className="text-lg font-semibold text-primary">{lobbyBetAmount.toLocaleString()} Coins</span>
+                    <span className="text-lg font-semibold text-card-foreground">{lobbyBetAmount.toLocaleString()} Coins</span>
                   </div>
                   <Slider
                     id="lobby-bet-slider"
@@ -619,5 +619,7 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
     </TooltipProvider>
   );
 }
+
+    
 
     
