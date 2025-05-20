@@ -5,9 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import Link from 'next/link';
-import { ArrowLeft, LogOut } from "lucide-react";
+import { ArrowLeft, LogOut, UserCircle, Home, CreditCard } from "lucide-react";
 import { useRouter } from 'next/navigation';
 import { useToast } from "@/hooks/use-toast";
+import { Separator } from "@/components/ui/separator";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -22,8 +23,15 @@ export default function ProfilePage() {
     router.push('/auth');
   };
 
-  // Simulate username for AvatarFallback
+  // Simulate user data
   const username = "Player123";
+  const email = "player123@example.com (Simulated)";
+  const joinDate = "January 1, 2024 (Simulated)";
+  const fullName = "John Doe (Simulated & Private)";
+  const address = "123 Main St, Anytown, USA (Simulated & Private)";
+  const iban = "DE89 3704 0044 0532 0130 00 (Simulated & Private)";
+  const bic = "COBADEFFXXX (Simulated & Private)";
+
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-background text-foreground p-4 sm:p-8">
@@ -43,16 +51,16 @@ export default function ProfilePage() {
           {/* User Info and Edit Button Section */}
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-center space-x-4"> {/* Avatar and text details */}
-              <Avatar className="h-20 w-20 border-2 border-accent">
+              <Avatar className="h-16 w-16 border-2 border-accent">
                 <AvatarImage src="https://placehold.co/128x128.png" alt="User Avatar" data-ai-hint="user avatar" />
-                <AvatarFallback className="bg-muted text-muted-foreground text-3xl">
+                <AvatarFallback className="bg-muted text-muted-foreground text-2xl">
                   {username.charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <div>
-                <h2 className="text-2xl font-semibold text-card-foreground">{username}</h2>
-                <p className="text-sm text-muted-foreground">player123@example.com (Simulated)</p>
-                <p className="text-xs text-muted-foreground">Joined: January 1, 2024 (Simulated)</p>
+                <h2 className="text-xl font-semibold text-card-foreground">{username}</h2>
+                <p className="text-xs text-muted-foreground">{email}</p>
+                <p className="text-xs text-muted-foreground">Joined: {joinDate}</p>
               </div>
             </div>
             <Button asChild variant="outline" size="sm" className="bg-background text-foreground hover:bg-muted hover:text-muted-foreground flex-shrink-0">
@@ -61,6 +69,45 @@ export default function ProfilePage() {
               </Link>
             </Button>
           </div>
+
+          <Separator />
+
+          {/* Detailed User Information */}
+          <div className="space-y-4">
+            <h3 className="text-xl font-semibold text-card-foreground border-b border-border pb-2">Account Details</h3>
+            <div className="space-y-3 text-sm">
+              <div className="flex items-start">
+                <UserCircle className="h-5 w-5 mr-3 mt-0.5 text-muted-foreground flex-shrink-0" />
+                <div>
+                  <p className="text-muted-foreground">Full Name:</p>
+                  <p className="font-medium text-card-foreground">{fullName}</p>
+                </div>
+              </div>
+              <div className="flex items-start">
+                <Home className="h-5 w-5 mr-3 mt-0.5 text-muted-foreground flex-shrink-0" />
+                <div>
+                  <p className="text-muted-foreground">Address:</p>
+                  <p className="font-medium text-card-foreground">{address}</p>
+                </div>
+              </div>
+              <div className="flex items-start">
+                <CreditCard className="h-5 w-5 mr-3 mt-0.5 text-muted-foreground flex-shrink-0" />
+                <div>
+                  <p className="text-muted-foreground">IBAN (for withdrawal):</p>
+                  <p className="font-medium text-card-foreground">{iban}</p>
+                </div>
+              </div>
+              <div className="flex items-start">
+                <CreditCard className="h-5 w-5 mr-3 mt-0.5 text-muted-foreground flex-shrink-0" />
+                <div>
+                  <p className="text-muted-foreground">BIC/SWIFT (for withdrawal):</p>
+                  <p className="font-medium text-card-foreground">{bic}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <Separator />
 
           <div className="space-y-4">
             <h3 className="text-xl font-semibold text-card-foreground border-b border-border pb-2">Game Statistics (Simulated)</h3>
@@ -92,6 +139,8 @@ export default function ProfilePage() {
             </div>
           </div>
 
+          <Separator />
+
           <div className="space-y-2">
              <h3 className="text-xl font-semibold text-card-foreground border-b border-border pb-2">Achievements (Simulated)</h3>
              <div className="flex flex-wrap gap-2">
@@ -120,3 +169,4 @@ export default function ProfilePage() {
     </div>
   );
 }
+
