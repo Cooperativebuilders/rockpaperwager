@@ -4,8 +4,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Wallet, Users, UserPlus, DoorOpen, XCircle, Hourglass, Repeat, Settings } from 'lucide-react'; // Added Settings
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'; // Added Avatar components
+import { Wallet, Users, UserPlus, DoorOpen, XCircle, Hourglass, Repeat, Settings } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 import type { Move, Outcome } from '@/lib/game';
 import { MOVES, determineWinner, MOVE_EMOJIS } from '@/lib/game';
@@ -337,13 +337,13 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
     );
   };
 
-  const getCardTitle = () => {
+  const getCardTitleText = () => {
     switch (gameState) {
       case 'initial': return "Choose Your Path";
       case 'selecting_bet_for_lobby': return "Create Lobby";
       case 'waiting_for_friend': return `Lobby with ${opponentName}`;
       case 'searching_for_random': return `Searching for ${opponentName}`;
-      case 'choosing_move': return `Your Turn vs ${opponentName} (Bet: ${placedBet})`;
+      case 'choosing_move': return `Your Turn vs ${opponentName}`; // Bet shown in description
       case 'revealing_moves':
       case 'game_result':
         return `Results vs ${opponentName}`;
@@ -359,34 +359,43 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
     <TooltipProvider>
       <Card className="w-full shadow-2xl rounded-xl overflow-hidden">
         <CardHeader className="bg-primary/10 p-6">
-          <div className="flex justify-between items-center">
-            <CardTitle className="text-3xl font-bold text-primary">{getCardTitle()}</CardTitle>
-            <div className="flex items-center gap-x-4">
-                <div className="flex items-center gap-x-2">
-                    <Avatar className="h-9 w-9">
-                        <AvatarImage src="https://placehold.co/64x64.png" alt="User Avatar" data-ai-hint="user avatar" />
-                        <AvatarFallback>P</AvatarFallback>
-                    </Avatar>
-                    <span className="text-md font-semibold text-foreground">
-                        Player123
-                    </span>
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-9 w-9 text-foreground hover:bg-accent/20">
-                                <Settings className="h-5 w-5" />
-                                <span className="sr-only">Profile Settings</span>
-                            </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                            <p>Profile Settings (Not Implemented)</p>
-                        </TooltipContent>
-                    </Tooltip>
-                </div>
-                <CoinDisplay amount={coins} onPurchaseClick={handleOpenTopUpDialog} />
+          <div className="flex justify-between items-center w-full">
+            {/* User Info Block - Left */}
+            <div className="flex items-center gap-x-3">
+              <Avatar className="h-12 w-12">
+                <AvatarImage src="https://placehold.co/64x64.png" alt="User Avatar" data-ai-hint="user avatar" />
+                <AvatarFallback>P</AvatarFallback>
+              </Avatar>
+              <span className="text-xl font-semibold text-foreground">
+                Player123
+              </span>
+            </div>
+
+            {/* Card Title - Center */}
+            <div className="flex-grow text-center px-4">
+              <CardTitle className="text-3xl font-bold text-primary inline-block">
+                {getCardTitleText()}
+              </CardTitle>
+            </div>
+
+            {/* Settings and Coins - Right */}
+            <div className="flex items-center gap-x-2">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-10 w-10 text-foreground hover:bg-accent/20">
+                    <Settings className="h-6 w-6" />
+                    <span className="sr-only">Profile Settings</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Profile Settings (Not Implemented)</p>
+                </TooltipContent>
+              </Tooltip>
+              <CoinDisplay amount={coins} onPurchaseClick={handleOpenTopUpDialog} />
             </div>
           </div>
           { (gameState === 'choosing_move' || gameState === 'waiting_for_friend' || gameState === 'searching_for_random' || gameState === 'game_result') && placedBet > 0 &&
-            <CardDescription className="text-md pt-2">Current Bet: {placedBet} coins</CardDescription>
+            <CardDescription className="text-md pt-2 text-center">Current Bet: {placedBet} coins</CardDescription>
           }
         </CardHeader>
 
@@ -595,4 +604,3 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
     </TooltipProvider>
   );
 }
-
