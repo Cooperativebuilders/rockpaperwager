@@ -138,10 +138,8 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
 
   useEffect(() => {
     if (initialLobbyConfig && !isProcessing && gameState !== 'waiting_for_friend') {
-      // Check if this specific lobby config has already been processed to prevent re-initialization on re-renders
-      // This check was causing a build error due to logical contradiction. It's removed.
+      // The following line was removed due to logical contradiction:
       // if (lobbyId === initialLobbyConfig.lobbyId && gameState === 'waiting_for_friend') return; 
-
       if (!user) {
         toast({ title: "Login Required", description: "Please log in to join a lobby.", variant: "destructive" });
         router.push('/auth');
@@ -698,7 +696,7 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
                       variant="outline"
                       size="icon"
                       className="rounded-full w-16 h-16 border-border text-foreground hover:bg-muted hover:text-muted-foreground"
-                      disabled={isProcessing && gameState !== 'choosing_move'}
+                      disabled={isProcessing}
                       aria-label="Leave to Main Menu"
                     >
                       <DoorOpen className="w-8 h-8" />
