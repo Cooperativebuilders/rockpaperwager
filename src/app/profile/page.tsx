@@ -72,8 +72,8 @@ export default function ProfilePage() {
              </div>
           </div>
 
-          <Button className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground mt-4" disabled>
-            Withdraw Coins (Not Implemented)
+          <Button asChild className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground mt-4">
+            <Link href="/profile/withdraw">Withdraw Coins</Link>
           </Button>
           <Button asChild className="w-full bg-primary hover:bg-primary/90 text-primary-foreground mt-2">
             <Link href="/profile/edit">Edit Profile</Link>
