@@ -1,9 +1,11 @@
+
 "use client"
 
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { VariantProps, cva } from "class-variance-authority"
 import { PanelLeft } from "lucide-react"
+import Image from "next/image"; // Added import for next/image
 
 import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
@@ -251,7 +253,13 @@ const Sidebar = React.forwardRef<
             className="flex h-full w-full flex-col bg-sidebar group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border group-data-[variant=floating]:shadow"
           >
             <div className="flex items-center justify-center p-4">
-              <img src="/logo.png" alt="Rock Paper Wager Logo" className="h-10" />
+              <Image 
+                src="/logo.png" 
+                alt="Rock Paper Wager Logo" 
+                width={728} 
+                height={1000} 
+                className="h-10 w-auto object-contain" 
+              />
             </div>
             <SidebarSeparator />
             {children}
