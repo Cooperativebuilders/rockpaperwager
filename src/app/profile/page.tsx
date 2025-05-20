@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import Link from 'next/link';
-import { ArrowLeft, LogOut, UserCircle, Home, CreditCard, Loader2, AlertTriangle } from "lucide-react";
+import { ArrowLeft, LogOut, UserCircle, Home, CreditCard, Loader2, AlertTriangle, Settings } from "lucide-react"; // Added Settings
 import { useAuth, type UserProfile as AuthUserProfile } from '@/contexts/auth-context';
 import { useEffect, useState } from "react";
 import { Separator } from "@/components/ui/separator";
@@ -13,52 +13,34 @@ import { useRouter } from "next/navigation";
 
 
 export default function ProfilePage() {
-  const { user, userProfile, signOut, loading: authLoading, error: authContextError, fetchUserProfile: fetchAuthUserProfile } = useAuth();
+  const { user, userProfile, signOut, loading: authLoading, error: authContextError } = useAuth();
   const router = useRouter();
   const [profileData, setProfileData] = useState<AuthUserProfile | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true); // Page-level loading state
   const [pageSpecificError, setPageSpecificError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!authLoading && !user) {
-      router.push('/auth'); 
-    }
-  }, [user, authLoading, router]);
-  
-  useEffect(() => {
-    setPageSpecificError(null); // Clear page-specific error on dependency change
-    if (userProfile) {
-      setProfileData(userProfile);
-      setIsLoading(false);
-    } else if (user && !authLoading) { 
-      // User is loaded, auth context isn't loading anymore
-      // If userProfile from context is null, try fetching, unless context already reported an error
-      if (authContextError) {
-        setPageSpecificError(authContextError);
-        setIsLoading(false);
-      } else {
-        const loadProfile = async () => {
-          setIsLoading(true);
-          try {
-            const fetched = await fetchAuthUserProfile(user.uid);
-            if (fetched) {
-              setProfileData(fetched);
-            } else {
-              setPageSpecificError("Profile data not found.");
+    setIsLoading(true); // Start loading when dependencies change
+    setPageSpecificError(null);
+
+    if (!authLoading) { // Wait for AuthContext to finish its initial load
+        if (user) { // If user is authenticated
+            if (userProfile) { // And profile was successfully loaded by AuthContext
+                setProfileData(userProfile);
+            } else { // User authenticated, but AuthContext failed to load profile (or it's genuinely null)
+                setProfileData(null);
+                setPageSpecificError(authContextError || "Your profile data could not be loaded. Please try again later.");
             }
-          } catch (err: any) {
-            console.error("Error fetching profile on page: ", err);
-            setPageSpecificError(err.message || "Failed to load profile data.");
-          } finally {
-            setIsLoading(false);
-          }
-        };
-        loadProfile();
-      }
-    } else if (!user && !authLoading) {
-       setIsLoading(false); 
+        } else { // No user authenticated, redirect to auth page
+            router.push('/auth');
+            // No need to set profileData or error here as we are redirecting,
+            // but we do want to stop page-level loading if we redirect.
+            // However, the redirect itself will unmount the component.
+        }
+        setIsLoading(false); // Done with page-specific loading logic after auth context resolves
     }
-  }, [user, userProfile, authLoading, authContextError, fetchAuthUserProfile]);
+    // If authLoading is true, page remains in its own isLoading state until authLoading is false
+}, [user, userProfile, authLoading, authContextError, router]);
 
 
   if (authLoading || isLoading) {
@@ -70,9 +52,8 @@ export default function ProfilePage() {
     );
   }
 
+  // No user after loading, and router.push('/auth') hasn't unmounted yet (should be quick)
   if (!user) {
-    // This case should ideally be handled by the redirect in the first useEffect,
-    // but as a fallback if the user object is cleared for some reason.
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-background text-foreground p-4 sm:p-8">
         <p>You need to be logged in to view this page.</p>
@@ -82,7 +63,7 @@ export default function ProfilePage() {
       </div>
     );
   }
-
+  
   if (pageSpecificError && !profileData) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-background text-foreground p-4 sm:p-8">
@@ -106,25 +87,12 @@ export default function ProfilePage() {
     );
   }
   
-  if (!profileData && !isLoading) {
-     // Fallback if profileData is still null after loading attempts without a specific error message caught
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-background text-foreground p-4 sm:p-8">
-        <p>Could not load profile data. Please try again later.</p>
-        <Button asChild className="mt-4">
-          <Link href="/">Go to Homepage</Link>
-        </Button>
-      </div>
-    );
-  }
-  
-  // Ensure profileData is not null before proceeding
+  // Fallback if profileData is still null after loading attempts without a specific error caught
   if (!profileData) {
-    // This should ideally be caught by one of the conditions above, but acts as a final safety net
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-background text-foreground p-4 sm:p-8">
          <Loader2 className="h-12 w-12 animate-spin text-primary" />
-         <p className="mt-4 text-muted-foreground">Preparing profile...</p>
+         <p className="mt-4 text-muted-foreground">Preparing profile data...</p>
        </div>
     );
   }
@@ -149,9 +117,9 @@ export default function ProfilePage() {
         <CardContent className="space-y-8 pt-6">
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-center space-x-4"> 
-              <Avatar className="h-16 w-16 border-2 border-accent">
+              <Avatar className="h-12 w-12 border-2 border-accent">
                 <AvatarImage src={profileData.avatarUrl || `https://placehold.co/128x128.png?text=${profileData.username.charAt(0).toUpperCase()}`} alt={profileData.username} data-ai-hint="user avatar" />
-                <AvatarFallback className="bg-muted text-muted-foreground text-2xl">
+                <AvatarFallback className="bg-muted text-muted-foreground text-xl">
                   {profileData.username.charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
@@ -266,5 +234,3 @@ export default function ProfilePage() {
     </div>
   );
 }
-
-    
