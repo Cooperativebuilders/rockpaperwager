@@ -21,6 +21,8 @@ import { Slider } from '@/components/ui/slider';
 import type { LobbyConfig } from '@/app/page';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/auth-context'; // Import useAuth
+import { useRouter } from 'next/navigation';
+
 
 // Custom SVG Icon Components inspired by the logo
 interface CustomIconProps extends React.SVGProps<SVGSVGElement> {
@@ -82,20 +84,23 @@ const SIMULATED_FRIENDS_LIST = ['Alice (Simulated)', 'Bob (Simulated)', 'Charlie
 interface GameInterfaceProps {
   initialLobbyConfig?: LobbyConfig | null;
   onLobbyInitialized?: () => void;
-  onCoinsChange?: (newCoinAmount: number) => void; // This might need to be removed if AuthContext handles coins
+  onCoinsChange?: (newCoinAmount: number) => void; 
   onActiveGameChange?: (isActive: boolean) => void;
 }
 
+const LOGO_URL = "https://storage.googleapis.com/rock-paper-wager.firebasestorage.app/public/logo.png";
+
 export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, onCoinsChange, onActiveGameChange }: GameInterfaceProps) {
   const { user, userProfile, loading: authLoading, updateFirestoreProfile } = useAuth();
-  const [coins, setCoins] = useState(userProfile?.coins || 1000); // Initialize from userProfile or default
+  const router = useRouter();
+  const [coins, setCoins] = useState(userProfile?.coins || 0); 
 
   const [placedBet, setPlacedBet] = useState(0);
   const [playerMove, setPlayerMove] = useState<Move | null>(null);
   const [opponentMove, setOpponentMove] = useState<Move | null>(null);
   const [resultText, setResultText] = useState('');
   const [gameState, setGameState] = useState<GameState>('initial');
-  const [isProcessing, setIsProcessing] = useState(false); // General processing for game actions
+  const [isProcessing, setIsProcessing] = useState(false); 
   const [lobbyId, setLobbyId] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState('');
   const [opponentName, setOpponentName] = useState("Opponent");
@@ -110,21 +115,20 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
 
   const { toast } = useToast();
 
-  // Sync coins with AuthContext userProfile
   useEffect(() => {
     if (userProfile) {
       setCoins(userProfile.coins);
+    } else if (!authLoading && !user) {
+      setCoins(0); // No user, no coins
     }
-  }, [userProfile]);
+  }, [userProfile, user, authLoading]);
 
-  // Propagate coin changes if onCoinsChange is provided (though this might become redundant with AuthContext)
   useEffect(() => {
     if (onCoinsChange) {
       onCoinsChange(coins);
     }
   }, [coins, onCoinsChange]);
 
-  // Notify HomePage about active game state
   useEffect(() => {
     if (onActiveGameChange) {
       const activeStates: GameState[] = ['selecting_bet_for_lobby', 'waiting_for_friend', 'searching_for_random', 'choosing_move', 'revealing_moves', 'game_result'];
@@ -132,10 +136,20 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
     }
   }, [gameState, onActiveGameChange]);
 
-  // Handle initial lobby configuration from HomePage (e.g., invite from Friend Zone)
   useEffect(() => {
     if (initialLobbyConfig && !isProcessing && gameState !== 'waiting_for_friend') {
       if (lobbyId === initialLobbyConfig.lobbyId && gameState === 'waiting_for_friend') return;
+      if (!user) {
+        toast({ title: "Login Required", description: "Please log in to join a lobby.", variant: "destructive" });
+        router.push('/auth');
+        return;
+      }
+      if (initialLobbyConfig.betAmount > coins) {
+         toast({ title: 'Insufficient Coins', description: `You need ${initialLobbyConfig.betAmount} coins for this lobby, but have ${coins}.`, variant: 'destructive' });
+         setIsTopUpDialogOpen(true);
+         if (onLobbyInitialized) onLobbyInitialized(); // Clear config even if failed
+         return;
+      }
 
       setOpponentName(initialLobbyConfig.friendName);
       setPlacedBet(initialLobbyConfig.betAmount);
@@ -148,17 +162,16 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
         onLobbyInitialized();
       }
     }
-  }, [initialLobbyConfig, onLobbyInitialized, isProcessing, lobbyId, gameState]);
+  }, [initialLobbyConfig, onLobbyInitialized, isProcessing, lobbyId, gameState, user, coins, toast, router]);
 
 
-  // Handle simulated waiting for friend/random player
   useEffect(() => {
     let gameStartTimer: NodeJS.Timeout;
     if (gameState === 'waiting_for_friend' || gameState === 'searching_for_random') {
       setIsProcessing(true);
       let currentStatus = '';
       if (gameState === 'waiting_for_friend' && lobbyId && opponentName) {
-        const displayOpponent = opponentName === "Friend" ? "your friend" : opponentName;
+        const displayOpponent = opponentName === "Friend" ? (selectedFriendForLobby || "your friend") : opponentName;
         currentStatus = `Lobby ID: ${lobbyId}. Share this ID with ${displayOpponent} to invite them! Waiting for ${displayOpponent} to join...`;
       } else if (gameState === 'searching_for_random' && opponentName !== "Random Player") {
          currentStatus = `Searching for ${opponentName} at ${placedBet} coins...`;
@@ -175,9 +188,8 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
       }, 3000);
     }
     return () => clearTimeout(gameStartTimer);
-  }, [gameState, lobbyId, placedBet, toast, opponentName]);
+  }, [gameState, lobbyId, placedBet, toast, opponentName, selectedFriendForLobby]);
 
-  // Handle move reveals and game result processing
    useEffect(() => {
     let revealTimer: NodeJS.Timeout;
     if (gameState === 'revealing_moves' && playerMove) {
@@ -187,14 +199,14 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
       setOpponentMove(randomOpponentMove);
 
       revealTimer = setTimeout(async () => {
-        if (!user) {
+        if (!user || !userProfile) {
           toast({ title: "Error", description: "You must be logged in to play.", variant: "destructive" });
           handleCancelAndReturnToInitial();
           return;
         }
         const outcome = determineWinner(playerMove, randomOpponentMove);
         let message = '';
-        let newCoins = coins;
+        let newCoins = userProfile.coins; // Start with coins from profile
         let toastVariant: 'default' | 'destructive' = 'default';
 
         switch (outcome) {
@@ -218,11 +230,10 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
         
         try {
           await updateFirestoreProfile(user.uid, { coins: newCoins });
-          setCoins(newCoins); // Update local state after Firestore success
+          // AuthContext will update userProfile, which will trigger coin state update via useEffect
         } catch (err) {
             console.error("Failed to update coins in Firestore:", err);
             toast({ title: "Coin Update Failed", description: "Could not sync coins with server. Please try again.", variant: "destructive"});
-            // Potentially revert local coin state or handle error more gracefully
         }
         
         setResultText(`${MOVE_EMOJIS[playerMove]} vs ${MOVE_EMOJIS[randomOpponentMove]} - ${message}`);
@@ -232,7 +243,7 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
       }, 1500);
     }
     return () => clearTimeout(revealTimer);
-  }, [gameState, playerMove, placedBet, coins, toast, opponentName, user, updateFirestoreProfile]);
+  }, [gameState, playerMove, placedBet, user, userProfile, toast, opponentName, updateFirestoreProfile]);
 
   const resetCommonStates = () => {
     setPlayerMove(null);
@@ -270,8 +281,13 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
     setOpponentName(selectedFriendForLobby);
     const newLobbyId = `LB${Math.random().toString(36).substring(2, 5).toUpperCase()}`;
     setLobbyId(newLobbyId);
-    resetCommonStates(); // Reset other states but keep selected friend for display during waiting
-    setSelectedFriendForLobby(selectedFriendForLobby); // Re-set it after resetCommonStates
+    
+    const currentSelectedFriend = selectedFriendForLobby; // Capture before reset
+    resetCommonStates(); 
+    setSelectedFriendForLobby(currentSelectedFriend); // Re-set it after resetCommonStates
+    setPlacedBet(amount); // Re-set placedBet after resetCommonStates
+    setOpponentName(currentSelectedFriend); // Re-set opponentName
+
     setGameState('waiting_for_friend');
   };
 
@@ -287,6 +303,8 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
     setLobbyId(null); 
     setOpponentName("Random Player"); 
     resetCommonStates();
+    setPlacedBet(amount); // Re-set placedBet after resetCommonStates
+    setOpponentName("Random Player"); // Re-set opponentName
     setGameState('searching_for_random');
   };
 
@@ -313,6 +331,8 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
       return;
     }
     resetCommonStates();
+    setPlacedBet(placedBet); // Keep the previous bet for rematch
+    setOpponentName(opponentName); // Keep the previous opponent for rematch
     setGameState('choosing_move');
   };
 
@@ -326,15 +346,15 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
   };
 
   const handleConfirmCoinPurchase = async (purchaseAmount: number) => {
-    if (!user) {
+    if (!user || !userProfile) {
       toast({ title: "Login Required", description: "Please log in.", variant: "destructive" });
       setIsTopUpDialogOpen(false);
       return;
     }
-    const newCoinTotal = coins + purchaseAmount;
+    const newCoinTotal = userProfile.coins + purchaseAmount;
     try {
       await updateFirestoreProfile(user.uid, { coins: newCoinTotal });
-      setCoins(newCoinTotal);
+      // AuthContext will update userProfile, which will trigger coin state update
       toast({
         title: "Coins Added!",
         description: `You've (simulated) purchased ${purchaseAmount.toLocaleString()} coins. Your balance is updated.`,
@@ -394,10 +414,11 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
   const avatarSrc = userProfile?.avatarUrl || user?.photoURL || `https://placehold.co/64x64.png?text=${usernameDisplay.charAt(0).toUpperCase()}`;
 
 
-  if (authLoading) {
+  if (authLoading && !userProfile) { // Show loader if auth is loading AND profile isn't available yet
     return (
       <Card className="w-full shadow-2xl rounded-xl overflow-hidden bg-card min-h-[400px] flex items-center justify-center">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        <p className="ml-4 text-card-foreground">Loading Game...</p>
       </Card>
     );
   }
@@ -414,13 +435,13 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
                 <AvatarFallback className="bg-muted text-muted-foreground">{usernameDisplay.charAt(0).toUpperCase()}</AvatarFallback>
               </Avatar>
               <span className="text-xl font-semibold text-card-foreground">
-                {usernameDisplay}
+                {user ? usernameDisplay : "Guest"}
               </span>
             </div>
 
             <div className="flex-grow flex justify-center items-center px-4">
               <Image
-                src="/logo.png"
+                src={LOGO_URL}
                 alt="Rock Paper Wager Logo"
                 width={728} 
                 height={1000} 
@@ -433,22 +454,22 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
             <div className="flex items-center gap-x-2">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button asChild variant="ghost" size="icon" className="h-10 w-10 text-card-foreground hover:bg-accent/20">
-                    <Link href="/profile">
+                  <Button asChild variant="ghost" size="icon" className="h-10 w-10 text-card-foreground hover:bg-accent/20" disabled={!user}>
+                    <Link href={user ? "/profile" : "/auth"}>
                        <Settings className="h-6 w-6" />
                        <span className="sr-only">Profile Settings</span>
                     </Link>
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent className="bg-popover text-popover-foreground border-border">
-                  <p>Profile Settings</p>
+                  <p>{user ? "Profile Settings" : "Login to access Profile"}</p>
                 </TooltipContent>
               </Tooltip>
-              <CoinDisplay amount={coins} onPurchaseClick={handleOpenTopUpDialog} className="bg-card text-card-foreground hover:bg-card/80" />
+              <CoinDisplay amount={user ? coins : 0} onPurchaseClick={user ? handleOpenTopUpDialog : () => router.push('/auth')} className="bg-card text-card-foreground hover:bg-card/80" />
             </div>
           </div>
           { (gameState === 'choosing_move' || gameState === 'waiting_for_friend' || gameState === 'searching_for_random' || gameState === 'game_result') && placedBet > 0 &&
-            <CardDescription className="text-md pt-2 text-center text-muted-foreground">Current Bet: {placedBet} coins</CardDescription>
+            <CardDescription className="text-md pt-2 text-center text-muted-foreground">Current Bet: {placedBet} coins vs {opponentName}</CardDescription>
           }
         </CardHeader>
 
@@ -466,7 +487,7 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
                 onClick={handleCreateLobbyIntent}
                 size="lg"
                 className="w-full text-lg bg-accent hover:bg-accent/90 text-accent-foreground shadow-md transform transition-transform hover:scale-105 py-3"
-                disabled={!user}
+                disabled={!user || isProcessing}
               >
                 <Users className="mr-2" /> Play a Friend
               </Button>
@@ -480,7 +501,7 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
                       key={`join-${config.amount}`}
                       onClick={() => handleJoinRandomGame(config.amount)}
                       className={cn(
-                        "rounded-full w-24 h-24 sm:w-28 sm:h-28 flex flex-col items-center justify-center p-2 text-lg shadow-md transform transition-transform hover:scale-105 disabled:opacity-70 disabled:cursor-not-allowed",
+                        "rounded-full w-28 h-28 flex flex-col items-center justify-center p-2 text-lg shadow-md transform transition-transform hover:scale-105 disabled:opacity-70 disabled:cursor-not-allowed",
                         config.bgColor,
                         config.hoverBgColor,
                         config.textColor
@@ -673,7 +694,7 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
                       onClick={handleCancelAndReturnToInitial}
                       variant="outline"
                       size="icon"
-                      className="rounded-full w-16 h-16 border-border text-card-foreground hover:bg-muted hover:text-muted-foreground"
+                      className="rounded-full w-16 h-16 border-border text-foreground hover:bg-muted hover:text-muted-foreground"
                       disabled={isProcessing && gameState !== 'choosing_move'}
                       aria-label="Leave to Main Menu"
                     >

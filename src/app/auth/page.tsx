@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Mail, Lock, User, LogIn, UserPlus, Loader2 } from 'lucide-react';
+import { Mail, Lock, User, LogIn, UserPlus, Loader2, ArrowLeft } from 'lucide-react';
 import Image from 'next/image';
 import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/contexts/auth-context';
@@ -23,6 +23,8 @@ const GoogleIcon = () => (
     <path fill="none" d="M0 0h48v48H0z"></path>
   </svg>
 );
+
+const LOGO_URL = "https://storage.googleapis.com/rock-paper-wager.firebasestorage.app/public/logo.png";
 
 export default function AuthPage() {
   const { signUp, signIn, signInWithGoogle, loading, error } = useAuth();
@@ -80,7 +82,7 @@ export default function AuthPage() {
 
           <div className="flex flex-col items-center px-6 py-6">
             <Image
-                src="/logo.png"
+                src={LOGO_URL}
                 alt="Rock Paper Wager Logo"
                 width={728}
                 height={1000}
