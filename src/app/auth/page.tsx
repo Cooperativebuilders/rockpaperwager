@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Mail, Lock, User, LogIn, UserPlus, Home } from 'lucide-react';
+import { Mail, Lock, User, LogIn, UserPlus } from 'lucide-react'; // Removed Home icon
 import Image from 'next/image';
 import { Separator } from '@/components/ui/separator';
 
@@ -41,6 +41,7 @@ export default function AuthPage() {
       title: "Login Attempt (Simulated)",
       description: `Would log in with email: ${loginEmail}`,
     });
+    // In a real app, redirect to '/' or dashboard after successful login
   };
 
   const handleSignUp = (e: React.FormEvent) => {
@@ -58,6 +59,7 @@ export default function AuthPage() {
       title: "Sign Up Attempt (Simulated)",
       description: `Would sign up user: ${signupUsername} with email: ${signupEmail}`,
     });
+    // In a real app, redirect to '/' or dashboard after successful sign up
   };
 
   const handleGoogleSignIn = () => {
@@ -66,23 +68,16 @@ export default function AuthPage() {
       title: "Google Sign-In (Simulated)",
       description: "Google Sign-In process would be initiated here.",
     });
+    // In a real app, redirect to '/' or dashboard after successful Google sign-in
   };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-background text-foreground p-4 sm:p-8">
       <Card className="w-full max-w-md shadow-xl rounded-xl bg-card text-card-foreground relative">
-        <div className="absolute top-4 left-4 z-10">
-          <Button asChild variant="outline" size="sm" className="text-card-foreground hover:bg-muted hover:text-muted-foreground">
-            <Link href="/">
-              <Home className="mr-2 h-4 w-4" />
-              Back to Game
-            </Link>
-          </Button>
-        </div>
+        {/* "Back to Game" button removed from here */}
         
         <Tabs defaultValue="login" className="w-full">
-          {/* Container for TabsList to manage top padding */}
-          <div className="px-4 pt-16 sm:px-6"> {/* Use page padding for consistency */}
+          <div className="px-4 pt-6 sm:px-6"> {/* Adjusted pt if Back to Game button was taking space */}
             <TabsList className="grid w-full grid-cols-2 rounded-lg h-14">
               <TabsTrigger value="login" className="text-md data-[state=active]:bg-primary data-[state=active]:text-primary-foreground h-full rounded-l-lg">
                 <LogIn className="mr-2 h-5 w-5" /> Login
@@ -93,7 +88,6 @@ export default function AuthPage() {
             </TabsList>
           </div>
 
-          {/* Logo Section - Below TabsList, above TabsContent */}
           <div className="flex flex-col items-center px-6 py-6">
             <Image
                 src="/logo.png"
@@ -104,11 +98,10 @@ export default function AuthPage() {
                 priority
                 data-ai-hint="company logo"
             />
-            {/* The h1 and p for "Rock Paper Wager" and tagline are removed as the logo likely includes this */}
           </div>
           
           <TabsContent value="login">
-            <CardContent className="space-y-6 p-6 pt-0"> {/* pt-0 as logo provides spacing */}
+            <CardContent className="space-y-6 p-6 pt-0">
               <form onSubmit={handleLogin} className="space-y-4">
                 <div>
                   <Label htmlFor="login-email" className="text-sm font-medium text-card-foreground">Email</Label>
@@ -126,7 +119,8 @@ export default function AuthPage() {
                   </div>
                 </div>
                 <div>
-                  <Label htmlFor="login-password" className="text-sm font-medium text-card-foreground">Password</Label>                   <div className="relative mt-1">
+                  <Label htmlFor="login-password" className="text-sm font-medium text-card-foreground">Password</Label>
+                  <div className="relative mt-1">
                     <Lock className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
                     <Input
                       id="login-password"
@@ -157,7 +151,7 @@ export default function AuthPage() {
           </TabsContent>
 
           <TabsContent value="signup">
-            <CardContent className="space-y-6 p-6 pt-0"> {/* pt-0 as logo provides spacing */}
+            <CardContent className="space-y-6 p-6 pt-0">
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div>
                   <Label htmlFor="signup-username" className="text-sm font-medium text-card-foreground">Username</Label>
