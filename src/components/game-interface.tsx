@@ -23,35 +23,35 @@ import type { LobbyConfig } from '@/app/page';
 const IconRock = (props: React.SVGProps<SVGSVGElement>) => (
   <svg viewBox="0 0 24 24" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
     {/* Simplified fist shape */}
-    <rect x="5" y="10" width="14" height="10" rx="2" fill="#F5EFE0" stroke="#2A3B2C" />
+    <rect x="5" y="10" width="14" height="10" rx="2" fill="hsl(var(--card-foreground))" stroke="hsl(var(--primary))" />
     {/* Knuckles/fingers part 1 */}
-    <path d="M7 10V8C7 6.89543 7.89543 6 9 6H11C12.1046 6 13 6.89543 13 8V10" fill="#F5EFE0" stroke="#2A3B2C" />
+    <path d="M7 10V8C7 6.89543 7.89543 6 9 6H11C12.1046 6 13 6.89543 13 8V10" fill="hsl(var(--card-foreground))" stroke="hsl(var(--primary))" />
     {/* Knuckles/fingers part 2 */}
-    <path d="M11 10V8C11 6.89543 11.8954 6 13 6H15C16.1046 6 17 6.89543 17 8V10" fill="#F5EFE0" stroke="#2A3B2C" />
+    <path d="M11 10V8C11 6.89543 11.8954 6 13 6H15C16.1046 6 17 6.89543 17 8V10" fill="hsl(var(--card-foreground))" stroke="hsl(var(--primary))" />
   </svg>
 );
 
 const IconPaper = (props: React.SVGProps<SVGSVGElement>) => (
   <svg viewBox="0 0 24 24" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
     {/* Simplified open palm */}
-    <path d="M4 16.8V7.2C4 6.0799 4 5.51984 4.21799 5.09202C4.40973 4.71569 4.71569 4.40973 5.09202 4.21799C5.51984 4 6.0799 4 7.2 4H16.8C17.9201 4 18.4802 4 18.908 4.21799C19.2843 4.40973 19.5903 4.71569 19.782 5.09202C20 5.51984 20 6.0799 20 7.2V16.8C20 17.9201 20 18.4802 19.782 18.908C19.5903 19.2843 19.2843 19.5903 18.908 19.782C18.4802 20 17.9201 20 16.8 20H7.2C6.0799 20 5.51984 20 5.09202 19.782C4.71569 19.5903 4.40973 19.2843 4.21799 18.908C4 18.4802 4 17.9201 4 16.8Z" fill="#F5EFE0" stroke="#2A3B2C"/>
+    <path d="M4 16.8V7.2C4 6.0799 4 5.51984 4.21799 5.09202C4.40973 4.71569 4.71569 4.40973 5.09202 4.21799C5.51984 4 6.0799 4 7.2 4H16.8C17.9201 4 18.4802 4 18.908 4.21799C19.2843 4.40973 19.5903 4.71569 19.782 5.09202C20 5.51984 20 6.0799 20 7.2V16.8C20 17.9201 20 18.4802 19.782 18.908C19.5903 19.2843 19.2843 19.5903 18.908 19.782C18.4802 20 17.9201 20 16.8 20H7.2C6.0799 20 5.51984 20 5.09202 19.782C4.71569 19.5903 4.40973 19.2843 4.21799 18.908C4 18.4802 4 17.9201 4 16.8Z" fill="hsl(var(--card-foreground))" stroke="hsl(var(--primary))"/>
     {/* Finger lines */}
-    <line x1="8" y1="8" x2="8" y2="16" stroke="#2A3B2C" />
-    <line x1="12" y1="6" x2="12" y2="16" stroke="#2A3B2C" />
-    <line x1="16" y1="8" x2="16" y2="16" stroke="#2A3B2C" />
+    <line x1="8" y1="8" x2="8" y2="16" stroke="hsl(var(--primary))" />
+    <line x1="12" y1="6" x2="12" y2="16" stroke="hsl(var(--primary))" />
+    <line x1="16" y1="8" x2="16" y2="16" stroke="hsl(var(--primary))" />
   </svg>
 );
 
 const IconScissors = (props: React.SVGProps<SVGSVGElement>) => (
   <svg viewBox="0 0 24 24" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
     {/* Palm part of scissors hand */}
-    <path d="M7 21V13C7 11.3431 8.34315 10 10 10H14C15.6569 10 17 11.3431 17 13V21H7Z" fill="#F5EFE0" stroke="#2A3B2C" />
+    <path d="M7 21V13C7 11.3431 8.34315 10 10 10H14C15.6569 10 17 11.3431 17 13V21H7Z" fill="hsl(var(--card-foreground))" stroke="hsl(var(--primary))" />
     {/* Two fingers forming V */}
-    <path d="M10 10L6 3" fill="none" stroke="#2A3B2C" />
-    <path d="M14 10L18 3" fill="none" stroke="#2A3B2C" />
+    <path d="M10 10L6 3" fill="none" stroke="hsl(var(--primary))" />
+    <path d="M14 10L18 3" fill="none" stroke="hsl(var(--primary))" />
     {/* Circles for finger joints (optional detail) */}
-    <circle cx="7.5" cy="13.5" r="1.5" fill="#F5EFE0" stroke="#2A3B2C" />
-    <circle cx="16.5" cy="13.5" r="1.5" fill="#F5EFE0" stroke="#2A3B2C" />
+    <circle cx="7.5" cy="13.5" r="1.5" fill="hsl(var(--card-foreground))" stroke="hsl(var(--primary))" />
+    <circle cx="16.5" cy="13.5" r="1.5" fill="hsl(var(--card-foreground))" stroke="hsl(var(--primary))" />
   </svg>
 );
 
@@ -109,7 +109,7 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
 
   useEffect(() => {
     if (onActiveGameChange) {
-      const activeStates: GameState[] = ['waiting_for_friend', 'searching_for_random', 'choosing_move', 'revealing_moves', 'game_result'];
+      const activeStates: GameState[] = ['selecting_bet_for_lobby', 'waiting_for_friend', 'searching_for_random', 'choosing_move', 'revealing_moves', 'game_result'];
       onActiveGameChange(activeStates.includes(gameState));
     }
   }, [gameState, onActiveGameChange]);
@@ -333,12 +333,12 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
         key={move}
         variant="outline"
         size="lg"
-        className="flex-1 transform transition-transform hover:scale-105 focus:scale-105 shadow-lg rounded-xl p-6"
+        className="flex-1 transform transition-transform hover:scale-105 focus:scale-105 shadow-lg rounded-xl p-6 bg-card-foreground hover:bg-card-foreground/90 text-primary"
         onClick={() => handleMakeMove(move)}
         disabled={isProcessing}
         aria-label={`Choose ${move}`}
       >
-        <IconComponent className="w-10 h-10 mr-2" />
+        <IconComponent className="w-10 h-10 mr-2" fill="hsl(var(--card-foreground))" stroke="hsl(var(--primary))" />
         <span className="capitalize text-lg">{move}</span>
       </Button>
     );
@@ -346,7 +346,7 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
 
   const getCardTitleText = () => {
     switch (gameState) {
-      case 'initial': return "Choose Your Path";
+      case 'initial': return "Rock Paper Wager";
       case 'selecting_bet_for_lobby': return "Create Lobby";
       case 'waiting_for_friend': return `Lobby with ${opponentName}`;
       case 'searching_for_random': return `Searching for ${opponentName}`;
@@ -364,13 +364,13 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
 
   return (
     <TooltipProvider>
-      <Card className="w-full shadow-2xl rounded-xl overflow-hidden">
+      <Card className="w-full shadow-2xl rounded-xl overflow-hidden bg-card">
         <CardHeader className="bg-primary/10 p-6">
           <div className="flex justify-between items-center w-full">
             <div className="flex items-center gap-x-3">
-              <Avatar className="h-12 w-12">
+              <Avatar className="h-12 w-12 border-2 border-accent">
                 <AvatarImage src="https://placehold.co/64x64.png" alt="User Avatar" data-ai-hint="user avatar" />
-                <AvatarFallback>P</AvatarFallback>
+                <AvatarFallback className="bg-muted text-muted-foreground">P</AvatarFallback>
               </Avatar>
               <span className="text-xl font-semibold text-foreground">
                 Player123
@@ -395,11 +395,11 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
                   <p>Profile Settings (Not Implemented)</p>
                 </TooltipContent>
               </Tooltip>
-              <CoinDisplay amount={coins} onPurchaseClick={handleOpenTopUpDialog} />
+              <CoinDisplay amount={coins} onPurchaseClick={handleOpenTopUpDialog} className="bg-card text-card-foreground hover:bg-card/80" />
             </div>
           </div>
           { (gameState === 'choosing_move' || gameState === 'waiting_for_friend' || gameState === 'searching_for_random' || gameState === 'game_result') && placedBet > 0 &&
-            <CardDescription className="text-md pt-2 text-center">Current Bet: {placedBet} coins</CardDescription>
+            <CardDescription className="text-md pt-2 text-center text-muted-foreground">Current Bet: {placedBet} coins</CardDescription>
           }
         </CardHeader>
 
@@ -441,7 +441,7 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
           {gameState === 'selecting_bet_for_lobby' && !isProcessing && (
             <div className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="friend-search" className="text-md font-semibold text-muted-foreground">Invite a Friend (Simulated Search):</Label>
+                <Label htmlFor="friend-search" className="text-md font-semibold text-card-foreground">Invite a Friend (Simulated Search):</Label>
                 <Popover open={isSuggestionsPopoverOpen} onOpenChange={setIsSuggestionsPopoverOpen}>
                   <PopoverTrigger asChild>
                      <div className="relative w-full">
@@ -457,12 +457,12 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
                             }
                           }}
                           autoComplete="off"
-                          className="w-full"
+                          className="w-full bg-input text-foreground placeholder:text-muted-foreground"
                         />
                       </div>
                   </PopoverTrigger>
                   <PopoverContent
-                    className="w-[--radix-popover-trigger-width] p-0"
+                    className="w-[--radix-popover-trigger-width] p-0 bg-popover border-border"
                     align="start"
                     onOpenAutoFocus={(e) => e.preventDefault()}
                   >
@@ -470,7 +470,7 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
                     {filteredSuggestions.map((friend) => (
                       <div
                         key={friend}
-                        className="px-3 py-2 text-sm cursor-pointer hover:bg-accent hover:text-accent-foreground"
+                        className="px-3 py-2 text-sm cursor-pointer text-popover-foreground hover:bg-accent hover:text-accent-foreground"
                         onMouseDown={() => handleSuggestionClick(friend)}
                       >
                         {friend}
@@ -482,12 +482,12 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
                     </div>
                   </PopoverContent>
                 </Popover>
-                 {selectedFriendForLobby && <p className="text-sm text-green-600 dark:text-green-400">Selected: {selectedFriendForLobby}</p>}
+                 {selectedFriendForLobby && <p className="text-sm text-green-400">Selected: {selectedFriendForLobby}</p>}
               </div>
 
               <div className="space-y-2">
                  <div className="flex justify-between items-center">
-                    <Label htmlFor="lobby-bet-slider" className="text-md font-semibold text-muted-foreground">
+                    <Label htmlFor="lobby-bet-slider" className="text-md font-semibold text-card-foreground">
                       Bet Amount:
                     </Label>
                     <span className="text-lg font-semibold text-card-foreground">{lobbyBetAmount.toLocaleString()} Coins</span>
@@ -501,6 +501,7 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
                     onValueChange={(value) => setLobbyBetAmount(value[0])}
                     disabled={!selectedFriendForLobby || isProcessing}
                     aria-label="Lobby bet amount slider"
+                    className="data-[disabled]:opacity-50"
                   />
               </div>
               <Button
@@ -513,14 +514,14 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
                 {selectedFriendForLobby && ` with ${selectedFriendForLobby}`}
               </Button>
 
-              <Button onClick={handleCancelAndReturnToInitial} variant="outline" className="w-full mt-4">
+              <Button onClick={handleCancelAndReturnToInitial} variant="outline" className="w-full mt-4 border-border text-card-foreground hover:bg-muted hover:text-muted-foreground">
                 <XCircle className="mr-2"/> Cancel
               </Button>
             </div>
           )}
 
           {(gameState === 'waiting_for_friend' || gameState === 'searching_for_random') && isProcessing && (
-             <Button onClick={handleCancelAndReturnToInitial} variant="outline" className="w-full mt-auto self-center max-w-xs">
+             <Button onClick={handleCancelAndReturnToInitial} variant="outline" className="w-full mt-auto self-center max-w-xs border-border text-card-foreground hover:bg-muted hover:text-muted-foreground">
               <XCircle className="mr-2"/> Cancel Search/Lobby
             </Button>
           )}
@@ -534,21 +535,21 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
           {(gameState === 'revealing_moves' || gameState === 'game_result') && !isProcessing && (
             <div className="text-center space-y-4 p-4 bg-secondary/30 rounded-lg">
               {playerMove && (
-                <p className="text-2xl font-semibold">
+                <p className="text-2xl font-semibold text-card-foreground">
                   You played: <span className="text-primary">{MOVE_EMOJIS[playerMove]} {playerMove}</span>
                 </p>
               )}
               {opponentMove && (
-                <p className="text-2xl font-semibold">
+                <p className="text-2xl font-semibold text-card-foreground">
                   {opponentName} played: <span className="text-destructive">{MOVE_EMOJIS[opponentMove]} {opponentMove}</span>
                 </p>
               )}
               {resultText && (
                 <p className={cn(
                   "text-3xl font-bold py-2",
-                  resultText.includes("won") && "text-green-600 dark:text-green-400",
-                  resultText.includes("lost") && "text-red-600 dark:text-red-400",
-                  resultText.includes("draw") && "text-yellow-600 dark:text-yellow-400"
+                  resultText.includes("won") && "text-green-400",
+                  resultText.includes("lost") && "text-red-500", // Adjusted for theme
+                  resultText.includes("draw") && "text-yellow-400" // Adjusted for theme
                 )}>
                   {resultText.substring(resultText.indexOf('- ') + 2)}
                 </p>
@@ -567,14 +568,14 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
                       onClick={handleRematch}
                       variant="default"
                       size="icon"
-                      className="rounded-full w-16 h-16 disabled:opacity-70 disabled:cursor-not-allowed"
+                      className="rounded-full w-16 h-16 bg-accent hover:bg-accent/90 text-accent-foreground disabled:opacity-70 disabled:cursor-not-allowed"
                       disabled={isProcessing || coins < placedBet}
                       aria-label={`Rematch ${opponentName} for ${placedBet} coins`}
                     >
                       <Repeat className="w-8 h-8" />
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent>
+                  <TooltipContent className="bg-popover text-popover-foreground border-border">
                     <p>Rematch {opponentName} ({placedBet} coins)</p>
                     {coins < placedBet && <p className="text-destructive">Not enough coins!</p>}
                   </TooltipContent>
@@ -585,14 +586,14 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
                       onClick={handleCancelAndReturnToInitial}
                       variant="outline"
                       size="icon"
-                      className="rounded-full w-16 h-16"
+                      className="rounded-full w-16 h-16 border-border text-card-foreground hover:bg-muted hover:text-muted-foreground"
                       disabled={isProcessing && gameState !== 'choosing_move'}
                       aria-label="Leave to Main Menu"
                     >
                       <DoorOpen className="w-8 h-8" />
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent>
+                  <TooltipContent className="bg-popover text-popover-foreground border-border">
                     <p>Leave to Main Menu</p>
                   </TooltipContent>
                 </Tooltip>
@@ -601,7 +602,7 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
             { gameState === 'choosing_move' && !isProcessing &&
               <Button
                 onClick={handleCancelAndReturnToInitial}
-                className="flex-1 text-lg"
+                className="flex-1 text-lg border-border text-card-foreground hover:bg-muted hover:text-muted-foreground"
                 size="lg"
                 variant="outline"
               >
@@ -619,7 +620,3 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
     </TooltipProvider>
   );
 }
-
-    
-
-    

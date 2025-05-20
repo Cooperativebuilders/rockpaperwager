@@ -34,7 +34,7 @@ export default function HomePage() {
     if (friendToInvite) {
       if (betAmount > currentPlayerCoins) {
         // Consider using a toast for this alert
-        alert("You don't have enough coins for this bet.");
+        alert("You don't have enough coins for this bet."); // TODO: Replace with toast
         return;
       }
       const newLobbyId = `LB${Math.random().toString(36).substring(2, 5).toUpperCase()}`;
