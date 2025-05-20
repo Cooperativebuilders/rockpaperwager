@@ -2,10 +2,10 @@
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
-import Image from 'next/image'; // Added Image import
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Wallet, Users, DoorOpen, XCircle, Hourglass, Repeat, Settings } from 'lucide-react';
+import { Users, DoorOpen, XCircle, Hourglass, Repeat, Settings } from 'lucide-react'; // Removed Wallet
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 import type { Move, Outcome } from '@/lib/game';
@@ -22,30 +22,35 @@ import type { LobbyConfig } from '@/app/page';
 import Link from 'next/link';
 
 // Custom SVG Icon Components inspired by the logo
-const IconRock = (props: React.SVGProps<SVGSVGElement>) => (
+interface CustomIconProps extends React.SVGProps<SVGSVGElement> {
+  fillColor?: string;
+  strokeColor?: string;
+}
+
+const IconRock = ({ fillColor = 'hsl(var(--card-foreground))', strokeColor = 'hsl(var(--primary))', ...props }: CustomIconProps) => (
   <svg viewBox="0 0 24 24" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
-    <rect x="5" y="10" width="14" height="10" rx="2" fill="hsl(var(--card-foreground))" stroke="hsl(var(--primary))" />
-    <path d="M7 10V8C7 6.89543 7.89543 6 9 6H11C12.1046 6 13 6.89543 13 8V10" fill="hsl(var(--card-foreground))" stroke="hsl(var(--primary))" />
-    <path d="M11 10V8C11 6.89543 11.8954 6 13 6H15C16.1046 6 17 6.89543 17 8V10" fill="hsl(var(--card-foreground))" stroke="hsl(var(--primary))" />
+    <rect x="5" y="10" width="14" height="10" rx="2" fill={fillColor} stroke={strokeColor} />
+    <path d="M7 10V8C7 6.89543 7.89543 6 9 6H11C12.1046 6 13 6.89543 13 8V10" fill={fillColor} stroke={strokeColor} />
+    <path d="M11 10V8C11 6.89543 11.8954 6 13 6H15C16.1046 6 17 6.89543 17 8V10" fill={fillColor} stroke={strokeColor} />
   </svg>
 );
 
-const IconPaper = (props: React.SVGProps<SVGSVGElement>) => (
+const IconPaper = ({ fillColor = 'hsl(var(--card-foreground))', strokeColor = 'hsl(var(--primary))', ...props }: CustomIconProps) => (
   <svg viewBox="0 0 24 24" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
-    <path d="M4 16.8V7.2C4 6.0799 4 5.51984 4.21799 5.09202C4.40973 4.71569 4.71569 4.40973 5.09202 4.21799C5.51984 4 6.0799 4 7.2 4H16.8C17.9201 4 18.4802 4 18.908 4.21799C19.2843 4.40973 19.5903 4.71569 19.782 5.09202C20 5.51984 20 6.0799 20 7.2V16.8C20 17.9201 20 18.4802 19.782 18.908C19.5903 19.2843 19.2843 19.5903 18.908 19.782C18.4802 20 17.9201 20 16.8 20H7.2C6.0799 20 5.51984 20 5.09202 19.782C4.71569 19.5903 4.40973 19.2843 4.21799 18.908C4 18.4802 4 17.9201 4 16.8Z" fill="hsl(var(--card-foreground))" stroke="hsl(var(--primary))"/>
-    <line x1="8" y1="8" x2="8" y2="16" stroke="hsl(var(--primary))" />
-    <line x1="12" y1="6" x2="12" y2="16" stroke="hsl(var(--primary))" />
-    <line x1="16" y1="8" x2="16" y2="16" stroke="hsl(var(--primary))" />
+    <path d="M4 16.8V7.2C4 6.0799 4 5.51984 4.21799 5.09202C4.40973 4.71569 4.71569 4.40973 5.09202 4.21799C5.51984 4 6.0799 4 7.2 4H16.8C17.9201 4 18.4802 4 18.908 4.21799C19.2843 4.40973 19.5903 4.71569 19.782 5.09202C20 5.51984 20 6.0799 20 7.2V16.8C20 17.9201 20 18.4802 19.782 18.908C19.5903 19.2843 19.2843 19.5903 18.908 19.782C18.4802 20 17.9201 20 16.8 20H7.2C6.0799 20 5.51984 20 5.09202 19.782C4.71569 19.5903 4.40973 19.2843 4.21799 18.908C4 18.4802 4 17.9201 4 16.8Z" fill={fillColor} stroke={strokeColor}/>
+    <line x1="8" y1="8" x2="8" y2="16" stroke={strokeColor} />
+    <line x1="12" y1="6" x2="12" y2="16" stroke={strokeColor} />
+    <line x1="16" y1="8" x2="16" y2="16" stroke={strokeColor} />
   </svg>
 );
 
-const IconScissors = (props: React.SVGProps<SVGSVGElement>) => (
+const IconScissors = ({ fillColor = 'hsl(var(--card-foreground))', strokeColor = 'hsl(var(--primary))', ...props }: CustomIconProps) => (
   <svg viewBox="0 0 24 24" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
-    <path d="M7 21V13C7 11.3431 8.34315 10 10 10H14C15.6569 10 17 11.3431 17 13V21H7Z" fill="hsl(var(--card-foreground))" stroke="hsl(var(--primary))" />
-    <path d="M10 10L6 3" fill="none" stroke="hsl(var(--primary))" />
-    <path d="M14 10L18 3" fill="none" stroke="hsl(var(--primary))" />
-    <circle cx="7.5" cy="13.5" r="1.5" fill="hsl(var(--card-foreground))" stroke="hsl(var(--primary))" />
-    <circle cx="16.5" cy="13.5" r="1.5" fill="hsl(var(--card-foreground))" stroke="hsl(var(--primary))" />
+    <path d="M7 21V13C7 11.3431 8.34315 10 10 10H14C15.6569 10 17 11.3431 17 13V21H7Z" fill={fillColor} stroke={strokeColor} />
+    <path d="M10 10L6 3" fill="none" stroke={strokeColor} />
+    <path d="M14 10L18 3" fill="none" stroke={strokeColor} />
+    <circle cx="7.5" cy="13.5" r="1.5" fill={fillColor} stroke={strokeColor} />
+    <circle cx="16.5" cy="13.5" r="1.5" fill={fillColor} stroke={strokeColor} />
   </svg>
 );
 
@@ -59,13 +64,18 @@ type GameState =
   | 'revealing_moves'
   | 'game_result';
 
-const MOVE_ICONS: Record<Move, React.ElementType> = {
+const MOVE_ICONS: Record<Move, React.ElementType<CustomIconProps>> = {
   rock: IconRock,
   paper: IconPaper,
   scissors: IconScissors,
 };
 
 const FIXED_BET_AMOUNTS = [10, 100, 1000];
+const FIXED_BET_ICONS: Record<number, React.ElementType<CustomIconProps>> = {
+  10: IconRock,
+  100: IconPaper,
+  1000: IconScissors,
+};
 const SIMULATED_FRIENDS_LIST = ['Alice (Simulated)', 'Bob (Simulated)', 'Charlie (Simulated)', 'Dave (Simulated)', 'Eve (Simulated)', 'Mallory (Simulated)'];
 
 interface GameInterfaceProps {
@@ -333,13 +343,11 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
         disabled={isProcessing}
         aria-label={`Choose ${move}`}
       >
-        <IconComponent className="w-10 h-10 mr-2" fill="hsl(var(--card-foreground))" stroke="hsl(var(--primary))" />
+        <IconComponent className="w-10 h-10 mr-2" fillColor="hsl(var(--card-foreground))" strokeColor="hsl(var(--primary))" />
         <span className="capitalize text-lg">{move}</span>
       </Button>
     );
   };
-
-  // getCardTitleText is removed as logo takes its place in the header.
 
   const filteredSuggestions = SIMULATED_FRIENDS_LIST.filter(friend =>
     friend.toLowerCase().includes(searchTerm.toLowerCase())
@@ -350,18 +358,16 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
       <Card className="w-full shadow-2xl rounded-xl overflow-hidden bg-card">
         <CardHeader className="bg-primary/10 p-6">
           <div className="flex justify-between items-center w-full">
-            {/* Left: Avatar and Username */}
             <div className="flex items-center gap-x-3">
               <Avatar className="h-12 w-12 border-2 border-accent">
                 <AvatarImage src="https://placehold.co/64x64.png" alt="User Avatar" data-ai-hint="user avatar" />
                 <AvatarFallback className="bg-muted text-muted-foreground">P</AvatarFallback>
               </Avatar>
-              <span className="text-xl font-semibold text-card-foreground"> {/* Changed text-foreground to text-card-foreground */}
+              <span className="text-xl font-semibold text-card-foreground">
                 Player123
               </span>
             </div>
 
-            {/* Center: Logo */}
             <div className="flex-grow flex justify-center items-center px-4">
               <Image
                 src="/logo.png"
@@ -374,7 +380,6 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
               />
             </div>
 
-            {/* Right: Settings and Coin Display */}
             <div className="flex items-center gap-x-2">
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -416,18 +421,22 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
               </Button>
               <p className="text-center text-muted-foreground my-4">Or Join a Random Game:</p>
               <div className="flex flex-col sm:flex-row sm:gap-4 items-center sm:justify-around mb-6">
-                {FIXED_BET_AMOUNTS.map((amount) => (
-                  <Button
-                    key={`join-${amount}`}
-                    onClick={() => handleJoinRandomGame(amount)}
-                    className="rounded-full w-28 h-28 flex flex-col items-center justify-center p-3 text-lg bg-accent hover:bg-accent/90 text-accent-foreground shadow-md transform transition-transform hover:scale-105 disabled:opacity-70 disabled:cursor-not-allowed"
-                    disabled={isProcessing || amount > coins}
-                    aria-label={`Join random game with ${amount} coins bet`}
-                  >
-                    <Wallet className="mb-1 h-6 w-6" />
-                    Bet {amount}
-                  </Button>
-                ))}
+                {FIXED_BET_AMOUNTS.map((amount) => {
+                  const IconComponent = FIXED_BET_ICONS[amount];
+                  return (
+                    <Button
+                      key={`join-${amount}`}
+                      onClick={() => handleJoinRandomGame(amount)}
+                      className="rounded-lg w-28 h-32 flex flex-col items-center justify-center p-2 text-lg bg-accent hover:bg-accent/90 text-accent-foreground shadow-md transform transition-transform hover:scale-105 disabled:opacity-70 disabled:cursor-not-allowed"
+                      disabled={isProcessing || amount > coins}
+                      aria-label={`Join random game with ${amount} coins bet`}
+                    >
+                      <IconComponent className="w-12 h-12 mb-1" fillColor="hsl(var(--accent-foreground))" strokeColor="hsl(var(--accent-foreground))" />
+                      <span className="text-xl font-bold">{amount}</span>
+                      <span className="text-xs font-medium">COINS</span>
+                    </Button>
+                  );
+                })}
               </div>
                <div className="space-y-3 pt-4 border-t border-border">
                  <div className="flex justify-between items-center">
@@ -641,3 +650,4 @@ export default function GameInterface({ initialLobbyConfig, onLobbyInitialized, 
     </TooltipProvider>
   );
 }
+
