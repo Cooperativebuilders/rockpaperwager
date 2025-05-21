@@ -1,0 +1,21 @@
+[
+  {
+    "origin": [
+      "http://localhost:3000",
+      "https://rock-paper-wager.vercel.app",
+      "https://rock-paper-wager.web.app",
+      "https://rock-paper-wager.firebaseapp.com",
+      "https://rockpaperwager-rock-paper-wager.europe-west4.hosted.app"
+    ],
+    "method": ["GET", "HEAD", "PUT", "POST", "DELETE"],
+    "responseHeader": ["Content-Type", "Authorization"],
+    "maxAgeSeconds": 3600
+  },
+
+  {
+    "origin": ["*"],
+    "method": ["GET"],
+    "responseHeader": ["Content-Type"],
+    "maxAgeSeconds": 300
+  }
+]
