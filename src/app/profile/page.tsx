@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import Link from 'next/link';
-import { ArrowLeft, LogOut, UserCircle, Home, CreditCard, Loader2, AlertTriangle, Settings } from "lucide-react"; // Added Settings
+import { ArrowLeft, LogOut, UserCircle, Home, CreditCard, Loader2, AlertTriangle, Settings } from "lucide-react";
 import { useAuth, type UserProfile as AuthUserProfile } from '@/contexts/auth-context';
 import { useEffect, useState } from "react";
 import { Separator } from "@/components/ui/separator";
@@ -17,31 +17,34 @@ export default function ProfilePage() {
   const { user, userProfile, signOut, loading: authLoading, error: authContextError } = useAuth();
   const router = useRouter();
   const [profileData, setProfileData] = useState<AuthUserProfile | null>(null);
-  const [isLoading, setIsLoading] = useState(true); // Page-level loading state
+  const [isLoading, setIsLoading] = useState(true);
   const [pageSpecificError, setPageSpecificError] = useState<string | null>(null);
 
   useEffect(() => {
-    setIsLoading(true); // Start loading when dependencies change
+    setIsLoading(true); 
     setPageSpecificError(null);
 
-    if (!authLoading) { // Wait for AuthContext to finish its initial load
-        if (user) { // If user is authenticated
-            if (userProfile) { // And profile was successfully loaded by AuthContext
+    if (!authLoading) { 
+        if (user) { 
+            if (userProfile) { 
                 setProfileData(userProfile);
-            } else { // User authenticated, but AuthContext failed to load profile (or it's genuinely null)
+            } else { 
                 setProfileData(null);
-                // Use the error from AuthContext if it exists and a profile wasn't loaded
-                setPageSpecificError(authContextError || "Your profile data could not be loaded. Please try again later.");
+                let detailedError = "Your profile data could not be loaded. Please try again later.";
+                if (authContextError) {
+                    if (authContextError.toLowerCase().includes("offline") || authContextError.toLowerCase().includes("network") || authContextError.toLowerCase().includes("failed to get document")) {
+                        detailedError = `Failed to connect to the database. Please check your Firebase configuration, security rules, and internet connection. Details: ${authContextError}`;
+                    } else {
+                        detailedError = authContextError;
+                    }
+                }
+                setPageSpecificError(detailedError);
             }
-        } else { // No user authenticated, redirect to auth page
+        } else { 
             router.push('/auth');
-            // No need to set profileData or error here as we are redirecting,
-            // but we do want to stop page-level loading if we redirect.
-            // However, the redirect itself will unmount the component.
         }
-        setIsLoading(false); // Done with page-specific loading logic after auth context resolves
+        setIsLoading(false); 
     }
-    // If authLoading is true, page remains in its own isLoading state until authLoading is false
 }, [user, userProfile, authLoading, authContextError, router]);
 
 
@@ -54,7 +57,6 @@ export default function ProfilePage() {
     );
   }
 
-  // No user after loading, and router.push('/auth') hasn't unmount yet (should be quick)
   if (!user) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-background text-foreground p-4 sm:p-8">
@@ -89,7 +91,6 @@ export default function ProfilePage() {
     );
   }
   
-  // Fallback if profileData is still null after loading attempts without a specific error caught
   if (!profileData) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-background text-foreground p-4 sm:p-8">
@@ -104,9 +105,10 @@ export default function ProfilePage() {
     if (dateValue instanceof Timestamp) {
       return dateValue.toDate().toLocaleDateString();
     }
-    if (dateValue instanceof Date) {
+    if (dateValue instanceof Date) { // If it's already a Date object
       return dateValue.toLocaleDateString();
     }
+    // Fallback for unexpected types, though UserProfile ensures it's Timestamp | Date
     return "Invalid date";
   };
 
@@ -131,9 +133,9 @@ export default function ProfilePage() {
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-center space-x-4"> 
               <Avatar className="h-12 w-12 border-2 border-accent">
-                <AvatarImage src={profileData.avatarUrl || `https://placehold.co/64x64.png?text=${profileData.username.charAt(0).toUpperCase()}`} alt={profileData.username} data-ai-hint="user avatar" />
+                <AvatarImage src={profileData.avatarUrl || `https://placehold.co/64x64.png?text=${(profileData.username || 'P').charAt(0).toUpperCase()}`} alt={profileData.username || 'User Avatar'} data-ai-hint="user avatar" />
                 <AvatarFallback className="bg-muted text-muted-foreground text-xl">
-                  {profileData.username.charAt(0).toUpperCase()}
+                  {(profileData.username || "P").charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <div>
@@ -192,27 +194,22 @@ export default function ProfilePage() {
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <p className="text-muted-foreground">Total Games Played:</p>
-                {/* TODO: Replace with dynamic value */} {/* Original: 150 */}
                 <p className="font-semibold text-lg text-card-foreground">?</p>
               </div>
               <div>
                 <p className="text-muted-foreground">Wins:</p>
-                {/* TODO: Replace with dynamic value */} {/* Original: 90 */}
                 <p className="font-semibold text-lg text-green-400">?</p>
               </div>
               <div>
                 <p className="text-muted-foreground">Losses:</p>
-                 {/* TODO: Replace with dynamic value */} {/* Original: 55 */}
                 <p className="font-semibold text-lg text-red-400">?</p>
               </div>
               <div>
                 <p className="text-muted-foreground">Draws:</p>
-                {/* TODO: Replace with dynamic value */} {/* Original: 5 */}
                 <p className="font-semibold text-lg text-yellow-400">?</p>
               </div>
               <div>
                 <p className="text-muted-foreground">Win Rate:</p>
-                {/* TODO: Replace with dynamic value */} {/* Original: 60% */}
                 <p className="font-semibold text-lg text-card-foreground">?</p>
               </div>
               <div>
@@ -252,3 +249,6 @@ export default function ProfilePage() {
     </div>
   );
 }
+
+
+    
