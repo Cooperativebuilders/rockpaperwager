@@ -49,7 +49,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const router = useRouter();
 
   const fetchUserProfileCallback = useCallback(async (uid: string): Promise<UserProfile | null> => {
-    setLoading(true); // Ensure loading is true at the start of fetch
+    setLoading(true); 
     setError(null);
     console.log(`Fetching profile for UID: ${uid}`);
     try {
@@ -69,16 +69,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       } else {
         console.warn(`No user profile document found for UID: ${uid}`);
         setUserProfile(null);
-        setError("User profile not found. Please complete sign up if this is a new account.");
+        // It's important to set an error if profile doesn't exist for a supposedly logged-in user.
+        setError("User profile not found. This could be due to incomplete sign-up or data issues.");
         setLoading(false);
         return null;
       }
     } catch (err: any) {
       console.error("Error fetching user profile: ", err);
-      setError(`Failed to fetch profile: ${err.message || 'Unknown error'}`);
+      const errorMessage = `Failed to fetch profile: ${err.message || 'Unknown error'}. Code: ${err.code || 'N/A'}`;
+      setError(errorMessage);
       setUserProfile(null);
       setLoading(false);
-      return null;
+      return null; // Return null instead of throwing, let UI handle error state from context
     }
   }, []);
 
@@ -110,21 +112,38 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       setLoading(true);
-      setError(null);
+      setError(null); // Clear previous errors on new auth state
       if (firebaseUser) {
         console.log("Auth state changed: user logged in", firebaseUser.uid);
         setUser(firebaseUser);
-        await fetchUserProfileCallback(firebaseUser.uid);
-        // setLoading(false) is handled within fetchUserProfileCallback
+        try {
+          const fetchedProfile = await fetchUserProfileCallback(firebaseUser.uid);
+          if (!fetchedProfile) {
+            // If profile fetch returned null (which now happens on error or not found),
+            // error state would have been set by fetchUserProfileCallback.
+            // Consider if any additional action is needed here, e.g., logging out the user.
+            console.warn(`Profile could not be loaded for user ${firebaseUser.uid}. Error state should be set.`);
+          }
+        } catch (profileError: any) { // This catch might be redundant if fetchUserProfileCallback doesn't throw
+          console.error("Unexpected error during profile fetch in onAuthStateChanged:", profileError);
+          setError(`Error loading profile: ${profileError.message || 'Unknown profile error'}`);
+        }
+        // setLoading(false) is managed within fetchUserProfileCallback
       } else {
         console.log("Auth state changed: user logged out");
         setUser(null);
         setUserProfile(null);
         setLoading(false);
       }
+    }, (authError) => { // Error observer for onAuthStateChanged itself
+      console.error("Firebase Auth state error (onAuthStateChanged):", authError);
+      setError(`Authentication error: ${authError.message || 'Failed to initialize or monitor auth state'}`);
+      setUser(null);
+      setUserProfile(null);
+      setLoading(false);
     });
     return () => unsubscribe();
-  }, [fetchUserProfileCallback]);
+  }, [fetchUserProfileCallback]); // Added fetchUserProfileCallback to dependency array
 
   const signUp = async (username: string, email: string, pass: string) => {
     setLoading(true);
@@ -138,13 +157,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         email: newUser.email,
         username: username,
         coins: 1000,
-        createdAt: serverTimestamp() as Timestamp,
+        createdAt: serverTimestamp() as Timestamp, // Firestore will convert this
         avatarUrl: `https://placehold.co/128x128.png?text=${username.charAt(0).toUpperCase()}`
       };
       await setDoc(userDocRef, newProfileData);
-      setUserProfile({
+      setUserProfile({ // Set local profile state, ensuring dates are JS Dates
           ...newProfileData,
-          createdAt: new Date()
+          createdAt: new Date(), // Approximate with client date for immediate UI
       });
       toast({ title: "Sign Up Successful", description: `Welcome, ${username}!` });
       router.push('/');
@@ -164,8 +183,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, pass);
       const loggedInUser = userCredential.user;
+      // Profile fetching is handled by onAuthStateChanged, but we can update lastLogin here
       await updateDoc(doc(db, 'users', loggedInUser.uid), { lastLogin: serverTimestamp() });
-      // Profile fetching is handled by onAuthStateChanged
       toast({ title: "Login Successful", description: "Welcome back!" });
       router.push('/');
     } catch (err: any)      {
@@ -199,7 +218,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           lastLogin: serverTimestamp() as Timestamp
         };
         await setDoc(userDocRef, newProfileData);
-        setUserProfile({
+        setUserProfile({ // Approximate with client dates for immediate UI
             ...newProfileData,
             createdAt: new Date(),
             lastLogin: new Date()
@@ -207,8 +226,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       } else {
         await updateDoc(userDocRef, {
           lastLogin: serverTimestamp(),
-          avatarUrl: googleUser.photoURL || userDocSnap.data()?.avatarUrl,
+          avatarUrl: googleUser.photoURL || userDocSnap.data()?.avatarUrl, // Keep existing avatar if Google doesn't provide one
         });
+        // Existing profile will be fetched by onAuthStateChanged
       }
       toast({ title: "Google Sign-In Successful", description: `Welcome, ${googleUser.displayName || googleUser.email}!` });
       router.push('/');
@@ -227,8 +247,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setError(null);
     try {
       await firebaseSignOut(auth);
-      setUser(null);
-      setUserProfile(null);
+      // setUser and setUserProfile to null is handled by onAuthStateChanged
       toast({ title: "Logged Out", description: "You have been successfully logged out." });
       router.push('/auth');
     } catch (err: any) {
@@ -237,7 +256,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setError(specificError);
       toast({ title: "Logout Failed", description: specificError, variant: "destructive" });
     } finally {
-      setLoading(false);
+      setLoading(false); // Ensure loading is set to false even if onAuthStateChanged is slow
     }
   };
 
@@ -245,6 +264,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUserProfile(prev => {
       if (!prev) return null;
       const updatedProfile = { ...prev, ...profileData };
+      // Ensure date types are consistently JS Date objects after update
       if (updatedProfile.createdAt && updatedProfile.createdAt instanceof Timestamp) {
           updatedProfile.createdAt = updatedProfile.createdAt.toDate();
       }
@@ -281,3 +301,6 @@ export const useAuth = (): AuthContextType => {
   }
   return context;
 };
+
+
+    
