@@ -14,9 +14,6 @@ const firebaseConfig = {
   appId: "1:279365393217:web:8a291134bab4bba51a1fc0"
 };
 
-// Log the config to help with debugging
-console.log("Firebase Config being used:", firebaseConfig);
-
 // Initialize Firebase
 let app: FirebaseApp;
 let auth: Auth;
@@ -24,10 +21,10 @@ let db: Firestore;
 
 if (!getApps().length) {
   app = initializeApp(firebaseConfig);
-  console.log("Firebase app initialized.");
+  console.log("Firebase app initialized."); // Kept this one as it's less sensitive and indicates initialization
 } else {
   app = getApp();
-  console.log("Firebase app already initialized.");
+  console.log("Firebase app already initialized."); // Kept this one
 }
 
 auth = getAuth(app);
